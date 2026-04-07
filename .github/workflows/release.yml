@@ -1,0 +1,43 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      - name: Publish
+        run: dotnet publish src/Boggle.App/Boggle.App.csproj --configuration Release --output ./publish --self-contained false
+
+      - name: Package
+        run: Compress-Archive -Path ./publish/* -DestinationPath ./Boggle-${{ github.ref_name }}.zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Boggle-${{ github.ref_name }}.zip
+          generate_release_notes: true
