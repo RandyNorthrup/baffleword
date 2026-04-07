@@ -38,6 +38,12 @@ public sealed class NavigationService : INavigationService
         where TViewModel : ViewModelBase
     {
         _logger.LogDebug("Navigating to {ViewModelType}", typeof(TViewModel).Name);
+
+        if (CurrentViewModel is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+
         CurrentViewModel = _serviceProvider.GetRequiredService<TViewModel>();
         NavigationChanged?.Invoke(this, EventArgs.Empty);
     }

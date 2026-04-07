@@ -26,8 +26,8 @@
             </Grid.Style>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" MaxHeight="250" />
             </Grid.RowDefinitions>
 
             <!-- Top Bar: Score | Timer | Pause -->
@@ -92,19 +92,20 @@
 
             <!-- Center: Board Grid -->
             <Border Grid.Row="1" Style="{StaticResource CardStyle}"
-                    Margin="16" HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Padding="8">
-                <ItemsControl x:Name="BoardGrid" ItemsSource="{Binding Tiles}"
-                              PreviewMouseLeftButtonDown="BoardGrid_PreviewMouseLeftButtonDown"
-                              PreviewMouseMove="BoardGrid_PreviewMouseMove"
-                              PreviewMouseLeftButtonUp="BoardGrid_PreviewMouseLeftButtonUp"
-                              Background="Transparent">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <UniformGrid Rows="4" Columns="4" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
+                    Margin="16,8" HorizontalAlignment="Center" VerticalAlignment="Top"
+                    Width="344" Height="344" Padding="8">
+                <Grid>
+                    <ItemsControl x:Name="BoardGrid" ItemsSource="{Binding Tiles}"
+                                  PreviewMouseLeftButtonDown="BoardGrid_PreviewMouseLeftButtonDown"
+                                  PreviewMouseMove="BoardGrid_PreviewMouseMove"
+                                  PreviewMouseLeftButtonUp="BoardGrid_PreviewMouseLeftButtonUp"
+                                  Background="Transparent">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Rows="4" Columns="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border x:Name="TileBorder" Width="72" Height="72" Margin="4"
                                     BorderThickness="2" CornerRadius="8"
@@ -148,6 +149,10 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+
+                    <!-- Drag Path Line Overlay -->
+                    <Canvas x:Name="DragLineCanvas" IsHitTestVisible="False" />
+                </Grid>
             </Border>
 
             <!-- Bottom: Current Selection + Found Words -->

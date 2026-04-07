@@ -393,13 +393,14 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
         };
     }
 
-    private void OnTimerTick(object? sender, EventArgs e)
+    private async void OnTimerTick(object? sender, EventArgs e)
     {
         TimeRemaining -= TimeSpan.FromMilliseconds(100);
         if (TimeRemaining <= TimeSpan.Zero)
         {
+            _timer.Stop();
             TimeRemaining = TimeSpan.Zero;
-            _ = EndRoundAsync();
+            await EndRoundAsync().ConfigureAwait(true);
         }
         else if (TimeRemaining.TotalSeconds <= 5 && TimeRemaining.Milliseconds < 100)
         {
@@ -461,32 +462,51 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
     private async Task EndRoundAsync()
     {
         _timer.Stop();
-        _audioManager.SoundEffects.Play(SoundEffect.RoundEnd);
-        GameRound completedRound = _gameEngine.EndRound();
+        IsTimerWarning = false;
 
-        GameStatistics stats = await _statisticsService.GetStatisticsAsync().ConfigureAwait(true);
-        IReadOnlyList<Achievement> unlocked = _achievementService.CheckAchievements(completedRound, stats);
-        await _highScoreService.TryRecordScoreAsync(completedRound).ConfigureAwait(true);
-        await _statisticsService.UpdateStatisticsAsync(completedRound).ConfigureAwait(true);
-
-        if (unlocked.Count > 0)
+        if (_currentRound == null || _currentRound.State == GameRoundState.Ended)
         {
-            _audioManager.SoundEffects.Play(SoundEffect.AchievementUnlock);
+            return;
         }
 
-        _navigation.NavigateTo<RoundResultsViewModel>();
-        if (_navigation.CurrentViewModel is RoundResultsViewModel resultsVm)
+        try
         {
-            resultsVm.LoadResults(completedRound, unlocked);
+            _audioManager.SoundEffects.Play(SoundEffect.RoundEnd);
+            GameRound completedRound = _gameEngine.EndRound();
+            _currentRound = null;
+
+            GameStatistics stats = await _statisticsService.GetStatisticsAsync().ConfigureAwait(true);
+            IReadOnlyList<Achievement> unlocked = _achievementService.CheckAchievements(completedRound, stats);
+            await _highScoreService.TryRecordScoreAsync(completedRound).ConfigureAwait(true);
+            await _statisticsService.UpdateStatisticsAsync(completedRound).ConfigureAwait(true);
+
+            if (unlocked.Count > 0)
+            {
+                _audioManager.SoundEffects.Play(SoundEffect.AchievementUnlock);
+            }
+
+            _navigation.NavigateTo<RoundResultsViewModel>();
+            if (_navigation.CurrentViewModel is RoundResultsViewModel resultsVm)
+            {
+                resultsVm.LoadResults(completedRound, unlocked);
+            }
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            System.Diagnostics.Debug.WriteLine($"EndRoundAsync error: {ex}");
+            _navigation.NavigateTo<MainMenuViewModel>();
         }
     }
 
     private void OnQuit()
     {
         _timer.Stop();
-        if (_currentRound != null)
+        IsTimerWarning = false;
+
+        if (_currentRound != null && _currentRound.State != GameRoundState.Ended)
         {
             _gameEngine.EndRound();
+            _currentRound = null;
         }
 
         _navigation.NavigateTo<MainMenuViewModel>();

@@ -7,9 +7,11 @@ namespace Boggle.App.Views;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Shapes;
 using Boggle.App.ViewModels;
 
 /// <summary>
@@ -63,6 +65,35 @@ public partial class GameView : UserControl
         return null;
     }
 
+    private static Border? GetTileBorder(DependencyObject? element)
+    {
+        while (element != null)
+        {
+            if (element is Border b && b.DataContext is TileViewModel)
+            {
+                return b;
+            }
+
+            element = VisualTreeHelper.GetParent(element);
+        }
+
+        return null;
+    }
+
+    private static bool IsCursorInsideTileCenter(DependencyObject hitElement, MouseEventArgs e)
+    {
+        Border? border = GetTileBorder(hitElement);
+        if (border == null)
+        {
+            return false;
+        }
+
+        const double margin = 12;
+        Point pos = e.GetPosition(border);
+        return pos.X >= margin && pos.X <= border.ActualWidth - margin &&
+               pos.Y >= margin && pos.Y <= border.ActualHeight - margin;
+    }
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         AnimateBoardEntrance();
@@ -105,6 +136,7 @@ public partial class GameView : UserControl
         if (tile != null)
         {
             vm.BeginDragSelection(tile);
+            UpdateDragLine();
             BoardGrid.CaptureMouse();
             e.Handled = true;
         }
@@ -120,6 +152,7 @@ public partial class GameView : UserControl
         if (e.LeftButton != MouseButtonState.Pressed)
         {
             vm.EndDragSelection();
+            ClearDragLine();
             BoardGrid.ReleaseMouseCapture();
             return;
         }
@@ -129,9 +162,10 @@ public partial class GameView : UserControl
         if (hit?.VisualHit is DependencyObject hitElement)
         {
             TileViewModel? tile = GetTileFromElement(hitElement);
-            if (tile != null)
+            if (tile != null && IsCursorInsideTileCenter(hitElement, e))
             {
                 vm.ExtendDragSelection(tile);
+                UpdateDragLine();
             }
         }
     }
@@ -144,8 +178,61 @@ public partial class GameView : UserControl
         }
 
         vm.EndDragSelection();
+        ClearDragLine();
         BoardGrid.ReleaseMouseCapture();
         e.Handled = true;
+    }
+
+    private void UpdateDragLine()
+    {
+        DragLineCanvas.Children.Clear();
+
+        if (DataContext is not GameViewModel vm || !vm.IsDragging)
+        {
+            return;
+        }
+
+        // Find the UniformGrid inside the ItemsControl
+        UniformGrid? grid = FindVisualChildren<UniformGrid>(BoardGrid).FirstOrDefault();
+        if (grid == null)
+        {
+            return;
+        }
+
+        var selectedTiles = vm.Tiles.Where(t => t.IsSelected).OrderBy(t => t.SelectionOrder).ToList();
+        if (selectedTiles.Count < 2)
+        {
+            return;
+        }
+
+        var polyline = new Polyline
+        {
+            Stroke = new SolidColorBrush(Color.FromRgb(66, 133, 244)),
+            StrokeThickness = 4,
+            StrokeLineJoin = PenLineJoin.Round,
+            StrokeStartLineCap = PenLineCap.Round,
+            StrokeEndLineCap = PenLineCap.Round,
+            Opacity = 0.7,
+        };
+
+        foreach (TileViewModel tile in selectedTiles)
+        {
+            int index = (tile.Row * 4) + tile.Column;
+            if (index < grid.Children.Count && grid.Children[index] is UIElement element)
+            {
+                Point center = element.TranslatePoint(
+                    new Point(element.RenderSize.Width / 2, element.RenderSize.Height / 2),
+                    DragLineCanvas);
+                polyline.Points.Add(center);
+            }
+        }
+
+        DragLineCanvas.Children.Add(polyline);
+    }
+
+    private void ClearDragLine()
+    {
+        DragLineCanvas.Children.Clear();
     }
 
     private void AnimateBoardEntrance()

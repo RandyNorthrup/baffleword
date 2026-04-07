@@ -64,8 +64,10 @@ public partial class RoundResultsView : UserControl
             EasingFunction = ease,
         };
 
-        ScoreCard.RenderTransform.BeginAnimation(ScaleTransform.ScaleXProperty, bounceX);
-        ScoreCard.RenderTransform.BeginAnimation(ScaleTransform.ScaleYProperty, bounceY);
+        var transform = new ScaleTransform(1, 1);
+        ScoreCard.RenderTransform = transform;
+        transform.BeginAnimation(ScaleTransform.ScaleXProperty, bounceX);
+        transform.BeginAnimation(ScaleTransform.ScaleYProperty, bounceY);
     }
 
     private void AnimateAchievements()
@@ -84,8 +86,10 @@ public partial class RoundResultsView : UserControl
                 EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut },
             };
 
+            var transform = new TranslateTransform(-20, 0);
+            badge.RenderTransform = transform;
             badge.BeginAnimation(OpacityProperty, fadeIn);
-            badge.RenderTransform.BeginAnimation(TranslateTransform.YProperty, slideIn);
+            transform.BeginAnimation(TranslateTransform.YProperty, slideIn);
 
             delay += 200;
         }
