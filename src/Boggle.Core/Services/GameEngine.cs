@@ -18,6 +18,7 @@ public sealed class GameEngine : IGameEngine
     private readonly IBoardSolver _boardSolver;
     private readonly IScoringService _scoringService;
     private readonly ILogger<GameEngine> _logger;
+    private GameMode _currentMode = GameMode.Standard;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GameEngine"/> class.
@@ -45,12 +46,13 @@ public sealed class GameEngine : IGameEngine
     public GameRound? CurrentRound { get; private set; }
 
     /// <inheritdoc/>
-    public GameRound StartRound(TimeSpan timerDuration, int minimumWordLength)
+    public GameRound StartRound(TimeSpan timerDuration, int minimumWordLength, GameMode mode = GameMode.Standard)
     {
-        _logger.LogInformation("Starting new round with {Duration} timer and min length {MinLength}", timerDuration, minimumWordLength);
+        _logger.LogInformation("Starting new {Mode} round with {Duration} timer and min length {MinLength}", mode, timerDuration, minimumWordLength);
 
-        GameBoard board = _boardGenerator.Generate();
-        CurrentRound = new GameRound(board, timerDuration, minimumWordLength);
+        _currentMode = mode;
+        GameBoard board = _boardGenerator.Generate(mode);
+        CurrentRound = new GameRound(board, timerDuration, minimumWordLength, mode);
         return CurrentRound;
     }
 
@@ -73,7 +75,7 @@ public sealed class GameEngine : IGameEngine
         }
 
         WordStatus status = _wordValidator.Validate(normalizedWord, CurrentRound.Board, CurrentRound.MinimumWordLength);
-        int points = status == WordStatus.Valid ? _scoringService.CalculateWordScore(normalizedWord) : 0;
+        int points = status == WordStatus.Valid ? _scoringService.CalculateWordScore(normalizedWord, _currentMode) : 0;
 
         var result = new WordResult(normalizedWord, status, points);
         CurrentRound.AddWordResult(result);

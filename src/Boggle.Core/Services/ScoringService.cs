@@ -4,15 +4,32 @@
 
 namespace Boggle.Core.Services;
 
+using Boggle.Core.Models;
+
 /// <summary>
 /// Calculates Boggle word scores according to official rules.
 /// </summary>
 public sealed class ScoringService : IScoringService
 {
     /// <inheritdoc/>
-    public int CalculateWordScore(string word)
+    public int CalculateWordScore(string word, GameMode mode = GameMode.Standard)
     {
         int length = GetEffectiveLength(word);
+
+        if (mode == GameMode.SuperBigBoggle)
+        {
+            return length switch
+            {
+                < 4 => 0,
+                4 => 1,
+                5 => 2,
+                6 => 3,
+                7 => 5,
+                8 => 11,
+                _ => length * 2,
+            };
+        }
+
         return length switch
         {
             < 3 => 0,

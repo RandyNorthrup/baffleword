@@ -61,32 +61,36 @@ public sealed class WordValidator : IWordValidator
 
     private static bool CanTraceOnBoard(string word, GameBoard board)
     {
-        return board.AllCells.Any(cell =>
+        return board.AllCells.Where(c => !c.IsBlocked).Any(cell =>
             TryMatchFromCell(word, 0, cell, board, new HashSet<(int Row, int Column)>()));
     }
 
     private static bool TryMatchFromCell(string word, int charIndex, BoardCell cell, GameBoard board, HashSet<(int Row, int Column)> visited)
     {
-        if (charIndex >= word.Length)
+        if (charIndex >= word.Length || cell.IsBlocked)
         {
-            return true;
+            return false;
         }
 
         // Check if this cell matches the current character(s)
         int charsConsumed;
-        if (cell.IsQu)
+        if (cell.IsDigraph)
         {
-            // "QU" cell must match "QU" at current position
-            if (charIndex + 1 < word.Length &&
-                word[charIndex] == 'Q' &&
-                word[charIndex + 1] == 'U')
-            {
-                charsConsumed = 2;
-            }
-            else
+            // Multi-letter cell (QU, TH, IN, etc.) must match all letters at current position
+            if (charIndex + cell.Letter.Length > word.Length)
             {
                 return false;
             }
+
+            for (int k = 0; k < cell.Letter.Length; k++)
+            {
+                if (word[charIndex + k] != cell.Letter[k])
+                {
+                    return false;
+                }
+            }
+
+            charsConsumed = cell.Letter.Length;
         }
         else
         {
@@ -108,7 +112,7 @@ public sealed class WordValidator : IWordValidator
         visited.Add((cell.Row, cell.Column));
 
         bool found = board.GetNeighbors(cell)
-            .Where(n => !visited.Contains((n.Row, n.Column)))
+            .Where(n => !n.IsBlocked && !visited.Contains((n.Row, n.Column)))
             .Any(neighbor => TryMatchFromCell(word, nextCharIndex, neighbor, board, visited));
 
         visited.Remove((cell.Row, cell.Column));

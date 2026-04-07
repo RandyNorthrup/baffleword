@@ -17,7 +17,7 @@ using Xunit;
 /// </summary>
 public sealed class HighScoreRepositoryTests : IDisposable
 {
-    private const int TimerDuration = 180;
+    private const string GameModeFilter = "Standard";
     private readonly SqliteConnection _keepAlive;
     private readonly BoggleDatabase _db;
     private readonly HighScoreRepository _sut;
@@ -45,7 +45,7 @@ public sealed class HighScoreRepositoryTests : IDisposable
 
         await _sut.AddAsync(entry);
 
-        IReadOnlyList<HighScoreEntry> scores = await _sut.GetTopAsync(TimerDuration, 10);
+        IReadOnlyList<HighScoreEntry> scores = await _sut.GetTopAsync(GameModeFilter, 10);
         scores.Should().ContainSingle();
     }
 
@@ -56,7 +56,7 @@ public sealed class HighScoreRepositoryTests : IDisposable
         await _sut.AddAsync(CreateEntry(100));
         await _sut.AddAsync(CreateEntry(75));
 
-        IReadOnlyList<HighScoreEntry> scores = await _sut.GetTopAsync(TimerDuration, 10);
+        IReadOnlyList<HighScoreEntry> scores = await _sut.GetTopAsync(GameModeFilter, 10);
 
         scores.Select(s => s.Score).Should().BeInDescendingOrder();
     }
@@ -69,7 +69,7 @@ public sealed class HighScoreRepositoryTests : IDisposable
             await _sut.AddAsync(CreateEntry(i * 10));
         }
 
-        IReadOnlyList<HighScoreEntry> scores = await _sut.GetTopAsync(TimerDuration, 5);
+        IReadOnlyList<HighScoreEntry> scores = await _sut.GetTopAsync(GameModeFilter, 5);
 
         scores.Should().HaveCount(5);
     }
@@ -81,7 +81,7 @@ public sealed class HighScoreRepositoryTests : IDisposable
         await _sut.AddAsync(CreateEntry(50));
         await _sut.AddAsync(CreateEntry(75));
 
-        int min = await _sut.GetMinimumTopScoreAsync(TimerDuration, 3);
+        int min = await _sut.GetMinimumTopScoreAsync(GameModeFilter, 3);
 
         min.Should().Be(50);
     }
@@ -89,7 +89,7 @@ public sealed class HighScoreRepositoryTests : IDisposable
     [Fact]
     public async Task GetMinimumTopScoreAsync_WhenEmpty_ReturnsZero()
     {
-        int min = await _sut.GetMinimumTopScoreAsync(TimerDuration, 10);
+        int min = await _sut.GetMinimumTopScoreAsync(GameModeFilter, 10);
 
         min.Should().Be(0);
     }
@@ -102,7 +102,7 @@ public sealed class HighScoreRepositoryTests : IDisposable
 
         await _sut.ClearAllAsync();
 
-        IReadOnlyList<HighScoreEntry> scores = await _sut.GetTopAsync(TimerDuration, 10);
+        IReadOnlyList<HighScoreEntry> scores = await _sut.GetTopAsync(GameModeFilter, 10);
         scores.Should().BeEmpty();
     }
 
@@ -112,7 +112,8 @@ public sealed class HighScoreRepositoryTests : IDisposable
         WordsFound = score / 10,
         CompletionPercentage = score / 100.0,
         LongestWord = "TEST",
-        TimerDuration = TimeSpan.FromSeconds(TimerDuration),
+        TimerDuration = TimeSpan.FromSeconds(180),
+        GameMode = GameMode.Standard,
         AchievedAt = DateTime.UtcNow,
     };
 }

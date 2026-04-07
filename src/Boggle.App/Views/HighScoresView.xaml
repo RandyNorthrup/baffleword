@@ -13,6 +13,49 @@
         <StackPanel Grid.Row="0" Margin="32,24,32,0">
             <TextBlock Text="High Scores" Style="{StaticResource H1Style}"
                        HorizontalAlignment="Center" Margin="0,0,0,16" />
+
+            <!-- Mode Tabs -->
+            <UniformGrid Rows="1" HorizontalAlignment="Center" Width="400" Margin="0,0,0,8">
+                <Button Content="Standard" Command="{Binding ShowStandardCommand}"
+                        Margin="0,0,4,0">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStandardSelected}" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource PrimaryBlueBrush}" />
+                                    <Setter Property="Foreground" Value="White" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="Big Boggle" Command="{Binding ShowBigBoggleCommand}"
+                        Margin="4,0,4,0">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsBigBoggleSelected}" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource PrimaryBlueBrush}" />
+                                    <Setter Property="Foreground" Value="White" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="Super Big" Command="{Binding ShowSuperBigBoggleCommand}"
+                        Margin="4,0,0,0">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSuperBigBoggleSelected}" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource PrimaryBlueBrush}" />
+                                    <Setter Property="Foreground" Value="White" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </UniformGrid>
         </StackPanel>
 
         <!-- Scores Table -->

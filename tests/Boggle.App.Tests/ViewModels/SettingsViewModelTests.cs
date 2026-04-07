@@ -53,31 +53,8 @@ public sealed class SettingsViewModelTests
     {
         var sut = CreateSut();
 
-        sut.TimerDurationSeconds.Should().Be(180);
-        sut.IsTimer3Min.Should().BeTrue();
         sut.SfxVolume.Should().Be(0.8);
         sut.MusicVolume.Should().Be(0.5);
-    }
-
-    [Fact]
-    public void TimerPresets_SetCorrectDuration()
-    {
-        var sut = CreateSut();
-
-        sut.IsTimer1Min = true;
-        sut.TimerDurationSeconds.Should().Be(60);
-        sut.IsTimer1Min.Should().BeTrue();
-        sut.IsTimer3Min.Should().BeFalse();
-        sut.IsTimer5Min.Should().BeFalse();
-
-        sut.IsTimer5Min = true;
-        sut.TimerDurationSeconds.Should().Be(300);
-        sut.IsTimer1Min.Should().BeFalse();
-        sut.IsTimer3Min.Should().BeFalse();
-        sut.IsTimer5Min.Should().BeTrue();
-
-        sut.IsTimer3Min = true;
-        sut.TimerDurationSeconds.Should().Be(180);
     }
 
     [Fact]
@@ -132,13 +109,11 @@ public sealed class SettingsViewModelTests
         _settingsRepo.Setup(r => r.SetAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
 
         var sut = CreateSut();
-        sut.TimerDurationSeconds = 120;
         sut.SfxVolume = 0.6;
         sut.MusicVolume = 0.4;
 
         sut.SaveCommand.Execute(null);
 
-        _settingsRepo.Verify(r => r.SetAsync("TimerDurationSeconds", "120"), Times.Once);
         _settingsRepo.Verify(r => r.SetAsync("SfxVolume", "0.6"), Times.Once);
         _settingsRepo.Verify(r => r.SetAsync("MusicVolume", "0.4"), Times.Once);
         _navigation.Verify(n => n.NavigateTo<MainMenuViewModel>(), Times.Once);
@@ -147,7 +122,6 @@ public sealed class SettingsViewModelTests
     [Fact]
     public async Task LoadSettings_PopulatesFromRepository()
     {
-        _settingsRepo.Setup(r => r.GetAsync("TimerDurationSeconds")).ReturnsAsync("240");
         _settingsRepo.Setup(r => r.GetAsync("SfxVolume")).ReturnsAsync("0.3");
         _settingsRepo.Setup(r => r.GetAsync("MusicVolume")).ReturnsAsync("0.9");
 
@@ -156,7 +130,6 @@ public sealed class SettingsViewModelTests
         // Allow the constructor's async load to complete
         await Task.Delay(200);
 
-        sut.TimerDurationSeconds.Should().Be(240);
         sut.SfxVolume.Should().Be(0.3);
         sut.MusicVolume.Should().Be(0.9);
     }

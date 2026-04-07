@@ -26,7 +26,7 @@ public sealed class HighScoreServiceTests
     public async Task TryRecordScoreAsync_QualifyingScore_RecordsAndReturnsEntry()
     {
         GameRound round = CreateRound(100, "TESTING");
-        _repository.Setup(r => r.GetMinimumTopScoreAsync(180, 50))
+        _repository.Setup(r => r.GetMinimumTopScoreAsync("Standard", 50))
             .ReturnsAsync(50);
 
         HighScoreEntry? result = await _sut.TryRecordScoreAsync(round);
@@ -41,7 +41,7 @@ public sealed class HighScoreServiceTests
     public async Task TryRecordScoreAsync_NonQualifyingScore_ReturnsNull()
     {
         GameRound round = CreateRound(10, "CAT");
-        _repository.Setup(r => r.GetMinimumTopScoreAsync(180, 50))
+        _repository.Setup(r => r.GetMinimumTopScoreAsync("Standard", 50))
             .ReturnsAsync(50);
 
         HighScoreEntry? result = await _sut.TryRecordScoreAsync(round);
@@ -54,7 +54,7 @@ public sealed class HighScoreServiceTests
     public async Task TryRecordScoreAsync_EmptyLeaderboard_RecordsScore()
     {
         GameRound round = CreateRound(1, "CAT");
-        _repository.Setup(r => r.GetMinimumTopScoreAsync(180, 50))
+        _repository.Setup(r => r.GetMinimumTopScoreAsync("Standard", 50))
             .ReturnsAsync(0);
 
         HighScoreEntry? result = await _sut.TryRecordScoreAsync(round);
@@ -67,7 +67,7 @@ public sealed class HighScoreServiceTests
     {
         GameRound round = new(CreateTestBoard(), TimeSpan.FromMinutes(3), 3);
         round.AddWordResult(new WordResult("XY", WordStatus.TooShort, 0));
-        _repository.Setup(r => r.GetMinimumTopScoreAsync(180, 50))
+        _repository.Setup(r => r.GetMinimumTopScoreAsync("Standard", 50))
             .ReturnsAsync(0);
 
         HighScoreEntry? result = await _sut.TryRecordScoreAsync(round);
@@ -79,9 +79,9 @@ public sealed class HighScoreServiceTests
     public async Task GetTopScoresAsync_DelegatesToRepository()
     {
         var expected = new List<HighScoreEntry> { new() { Score = 100 } };
-        _repository.Setup(r => r.GetTopAsync(180, 10)).ReturnsAsync(expected);
+        _repository.Setup(r => r.GetTopAsync("Standard", 10)).ReturnsAsync(expected);
 
-        IReadOnlyList<HighScoreEntry> result = await _sut.GetTopScoresAsync(TimeSpan.FromMinutes(3), 10);
+        IReadOnlyList<HighScoreEntry> result = await _sut.GetTopScoresAsync(GameMode.Standard, 10);
 
         result.Should().BeSameAs(expected);
     }
@@ -91,7 +91,7 @@ public sealed class HighScoreServiceTests
     {
         GameRound round = CreateRound(100, "TESTING");
         round.TotalPossibleWords = 10;
-        _repository.Setup(r => r.GetMinimumTopScoreAsync(180, 50))
+        _repository.Setup(r => r.GetMinimumTopScoreAsync("Standard", 50))
             .ReturnsAsync(0);
 
         HighScoreEntry? result = await _sut.TryRecordScoreAsync(round);

@@ -5,51 +5,55 @@
 namespace Boggle.Core.Models;
 
 /// <summary>
-/// Represents a 4×4 Boggle game board.
+/// Represents a Boggle game board of variable size.
 /// </summary>
 public sealed class GameBoard
 {
-    /// <summary>
-    /// The number of rows on the board.
-    /// </summary>
-    public const int Rows = 4;
-
-    /// <summary>
-    /// The number of columns on the board.
-    /// </summary>
-    public const int Columns = 4;
-
-    /// <summary>
-    /// The total number of cells on the board.
-    /// </summary>
-    public const int TotalCells = Rows * Columns;
-
     private readonly BoardCell[][] _cells;
+    private IReadOnlyList<BoardCell>? _allCellsCache;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GameBoard"/> class.
     /// </summary>
-    /// <param name="cells">A 4×4 jagged array of board cells.</param>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "S2368:Public methods should not have multidimensional array parameters", Justification = "A 4x4 jagged array is the natural representation of a Boggle board.")]
+    /// <param name="cells">A jagged array of board cells.</param>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "S2368:Public methods should not have multidimensional array parameters", Justification = "A jagged array is the natural representation of a Boggle board.")]
     public GameBoard(BoardCell[][] cells)
     {
         ArgumentNullException.ThrowIfNull(cells);
 
-        if (cells.Length != Rows)
+        if (cells.Length == 0)
         {
-            throw new ArgumentException($"Board must have {Rows} rows.", nameof(cells));
+            throw new ArgumentException("Board must have at least one row.", nameof(cells));
         }
 
-        for (int i = 0; i < Rows; i++)
+        int columns = cells[0]?.Length ?? 0;
+        for (int i = 0; i < cells.Length; i++)
         {
-            if (cells[i] is null || cells[i].Length != Columns)
+            if (cells[i] is null || cells[i].Length != columns)
             {
-                throw new ArgumentException($"Each row must have {Columns} columns.", nameof(cells));
+                throw new ArgumentException("All rows must have the same number of columns.", nameof(cells));
             }
         }
 
+        Rows = cells.Length;
+        Columns = columns;
         _cells = cells;
     }
+
+    /// <summary>
+    /// Gets the number of rows on the board.
+    /// </summary>
+    public int Rows { get; }
+
+    /// <summary>
+    /// Gets the number of columns on the board.
+    /// </summary>
+    public int Columns { get; }
+
+    /// <summary>
+    /// Gets the total number of cells on the board.
+    /// </summary>
+    public int TotalCells => Rows * Columns;
 
     /// <summary>
     /// Gets all cells on the board as a flat list.
@@ -58,24 +62,30 @@ public sealed class GameBoard
     {
         get
         {
-            var result = new List<BoardCell>(TotalCells);
+            if (_allCellsCache is not null)
+            {
+                return _allCellsCache;
+            }
+
+            var result = new BoardCell[TotalCells];
             for (int row = 0; row < Rows; row++)
             {
                 for (int col = 0; col < Columns; col++)
                 {
-                    result.Add(_cells[row][col]);
+                    result[(row * Columns) + col] = _cells[row][col];
                 }
             }
 
-            return result;
+            _allCellsCache = result;
+            return _allCellsCache;
         }
     }
 
     /// <summary>
     /// Gets the cell at the specified position.
     /// </summary>
-    /// <param name="row">The row index (0-3).</param>
-    /// <param name="column">The column index (0-3).</param>
+    /// <param name="row">The row index.</param>
+    /// <param name="column">The column index.</param>
     /// <returns>The board cell at the specified position.</returns>
     public BoardCell this[int row, int column] => _cells[row][column];
 

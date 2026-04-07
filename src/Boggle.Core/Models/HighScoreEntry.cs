@@ -40,6 +40,11 @@ public sealed class HighScoreEntry
     public TimeSpan TimerDuration { get; set; }
 
     /// <summary>
+    /// Gets or sets the game mode used for this round.
+    /// </summary>
+    public GameMode GameMode { get; set; }
+
+    /// <summary>
     /// Gets or sets when this score was achieved.
     /// </summary>
     public DateTime AchievedAt { get; set; }

@@ -33,8 +33,8 @@ public sealed class HighScoreService : IHighScoreService
     {
         ArgumentNullException.ThrowIfNull(round);
 
-        int timerSeconds = (int)round.TimerDuration.TotalSeconds;
-        int minimumScore = await _repository.GetMinimumTopScoreAsync(timerSeconds, MaxTopScores).ConfigureAwait(false);
+        string gameMode = round.Mode.ToString();
+        int minimumScore = await _repository.GetMinimumTopScoreAsync(gameMode, MaxTopScores).ConfigureAwait(false);
 
         if (round.Score <= minimumScore)
         {
@@ -55,6 +55,7 @@ public sealed class HighScoreService : IHighScoreService
             LongestWord = longestWord,
             CompletionPercentage = round.CompletionPercentage,
             TimerDuration = round.TimerDuration,
+            GameMode = round.Mode,
             AchievedAt = DateTime.UtcNow,
         };
 
@@ -64,9 +65,8 @@ public sealed class HighScoreService : IHighScoreService
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<HighScoreEntry>> GetTopScoresAsync(TimeSpan timerDuration, int count = 50)
+    public async Task<IReadOnlyList<HighScoreEntry>> GetTopScoresAsync(GameMode gameMode, int count = 50)
     {
-        int timerSeconds = (int)timerDuration.TotalSeconds;
-        return await _repository.GetTopAsync(timerSeconds, count).ConfigureAwait(false);
+        return await _repository.GetTopAsync(gameMode.ToString(), count).ConfigureAwait(false);
     }
 }

@@ -22,7 +22,7 @@ public sealed class GameEngineTests
 
     public GameEngineTests()
     {
-        _boardGenerator.Setup(b => b.Generate()).Returns(CreateTestBoard);
+        _boardGenerator.Setup(b => b.Generate(It.IsAny<GameMode>())).Returns(CreateTestBoard);
         _sut = new GameEngine(
             _boardGenerator.Object,
             _wordValidator.Object,
@@ -64,7 +64,7 @@ public sealed class GameEngineTests
         _sut.StartRound(TimeSpan.FromMinutes(3), 3);
         _wordValidator.Setup(v => v.Validate("TEST", It.IsAny<GameBoard>(), 3))
             .Returns(WordStatus.Valid);
-        _scoringService.Setup(s => s.CalculateWordScore("TEST")).Returns(1);
+        _scoringService.Setup(s => s.CalculateWordScore("TEST", It.IsAny<GameMode>())).Returns(1);
 
         WordResult result = _sut.SubmitWord("test");
 
@@ -92,7 +92,7 @@ public sealed class GameEngineTests
         _sut.StartRound(TimeSpan.FromMinutes(3), 3);
         _wordValidator.Setup(v => v.Validate("TEST", It.IsAny<GameBoard>(), 3))
             .Returns(WordStatus.Valid);
-        _scoringService.Setup(s => s.CalculateWordScore("TEST")).Returns(1);
+        _scoringService.Setup(s => s.CalculateWordScore("TEST", It.IsAny<GameMode>())).Returns(1);
 
         _sut.SubmitWord("test");
         WordResult duplicate = _sut.SubmitWord("test");
@@ -191,7 +191,7 @@ public sealed class GameEngineTests
         _sut.StartRound(TimeSpan.FromMinutes(3), 3);
         _wordValidator.Setup(v => v.Validate("CAT", It.IsAny<GameBoard>(), 3))
             .Returns(WordStatus.Valid);
-        _scoringService.Setup(s => s.CalculateWordScore("CAT")).Returns(1);
+        _scoringService.Setup(s => s.CalculateWordScore("CAT", It.IsAny<GameMode>())).Returns(1);
         _boardSolver.Setup(s => s.Solve(It.IsAny<GameBoard>(), 3))
             .Returns(new List<string> { "CAT", "DOG" });
 
@@ -217,7 +217,7 @@ public sealed class GameEngineTests
     {
         _sut.StartRound(TimeSpan.FromMinutes(3), 3);
 
-        _boardGenerator.Verify(b => b.Generate(), Times.Once);
+        _boardGenerator.Verify(b => b.Generate(It.IsAny<GameMode>()), Times.Once);
     }
 
     [Fact]
@@ -226,7 +226,7 @@ public sealed class GameEngineTests
         _sut.StartRound(TimeSpan.FromMinutes(3), 3);
         _wordValidator.Setup(v => v.Validate("HELLO", It.IsAny<GameBoard>(), 3))
             .Returns(WordStatus.Valid);
-        _scoringService.Setup(s => s.CalculateWordScore("HELLO")).Returns(2);
+        _scoringService.Setup(s => s.CalculateWordScore("HELLO", It.IsAny<GameMode>())).Returns(2);
 
         WordResult result = _sut.SubmitWord("  hello  ");
 

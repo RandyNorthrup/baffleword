@@ -59,9 +59,9 @@ public sealed class BoardGeneratorTests
         GameBoard board1 = gen1.Generate();
         GameBoard board2 = gen2.Generate();
 
-        for (int r = 0; r < GameBoard.Rows; r++)
+        for (int r = 0; r < board1.Rows; r++)
         {
-            for (int c = 0; c < GameBoard.Columns; c++)
+            for (int c = 0; c < board1.Columns; c++)
             {
                 board1[r, c].Letter.Should().Be(board2[r, c].Letter);
             }
@@ -79,9 +79,9 @@ public sealed class BoardGeneratorTests
 
         // At least one cell should differ with very high probability
         bool anyDifferent = false;
-        for (int r = 0; r < GameBoard.Rows; r++)
+        for (int r = 0; r < board1.Rows; r++)
         {
-            for (int c = 0; c < GameBoard.Columns; c++)
+            for (int c = 0; c < board1.Columns; c++)
             {
                 if (board1[r, c].Letter != board2[r, c].Letter)
                 {
@@ -91,5 +91,85 @@ public sealed class BoardGeneratorTests
         }
 
         anyDifferent.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Generate_BigBoggle_Returns5x5Board()
+    {
+        GameBoard board = _sut.Generate(GameMode.BigBoggle);
+
+        board.Rows.Should().Be(5);
+        board.Columns.Should().Be(5);
+        board.AllCells.Should().HaveCount(25);
+    }
+
+    [Fact]
+    public void Generate_BigBoggle_AllCellsHaveLetters()
+    {
+        GameBoard board = _sut.Generate(GameMode.BigBoggle);
+
+        foreach (BoardCell cell in board.AllCells)
+        {
+            cell.Letter.Should().NotBeNullOrEmpty();
+        }
+    }
+
+    [Fact]
+    public void Generate_SuperBigBoggle_Returns6x6Board()
+    {
+        GameBoard board = _sut.Generate(GameMode.SuperBigBoggle);
+
+        board.Rows.Should().Be(6);
+        board.Columns.Should().Be(6);
+        board.AllCells.Should().HaveCount(36);
+    }
+
+    [Fact]
+    public void Generate_SuperBigBoggle_AllCellsHaveLetters()
+    {
+        GameBoard board = _sut.Generate(GameMode.SuperBigBoggle);
+
+        foreach (BoardCell cell in board.AllCells)
+        {
+            cell.Letter.Should().NotBeNullOrEmpty();
+        }
+    }
+
+    [Fact]
+    public void Generate_SuperBigBoggle_MayContainBlockedCells()
+    {
+        // Generate many boards; at least one should have a blocked cell
+        // (die #27 has 3 blocked faces out of 6, so probability is very high)
+        bool foundBlocked = false;
+        for (int i = 0; i < 20; i++)
+        {
+            var gen = new BoardGenerator(NullLogger<BoardGenerator>.Instance, new Random(i));
+            GameBoard board = gen.Generate(GameMode.SuperBigBoggle);
+            if (board.AllCells.Any(c => c.IsBlocked))
+            {
+                foundBlocked = true;
+                break;
+            }
+        }
+
+        foundBlocked.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Generate_SuperBigBoggle_MayContainDigraphs()
+    {
+        bool foundDigraph = false;
+        for (int i = 0; i < 20; i++)
+        {
+            var gen = new BoardGenerator(NullLogger<BoardGenerator>.Instance, new Random(i));
+            GameBoard board = gen.Generate(GameMode.SuperBigBoggle);
+            if (board.AllCells.Any(c => c.IsDigraph))
+            {
+                foundDigraph = true;
+                break;
+            }
+        }
+
+        foundDigraph.Should().BeTrue();
     }
 }

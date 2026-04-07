@@ -28,12 +28,18 @@
 
         <!-- Menu Buttons -->
         <StackPanel Grid.Row="2" HorizontalAlignment="Center" Width="280">
-            <Button Content="New Game"
-                    Command="{Binding NewGameCommand}"
-                    Style="{StaticResource PrimaryButtonStyle}"
-                    FontSize="16"
-                    Padding="24,14"
-                    Margin="0,0,0,12" />
+            <Button Content="Standard"
+                    Command="{Binding PlayStandardCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Margin="0,0,0,8" />
+            <Button Content="Big Boggle"
+                    Command="{Binding PlayBigBoggleCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Margin="0,0,0,8" />
+            <Button Content="Super Big Boggle"
+                    Command="{Binding PlaySuperBigBoggleCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Margin="0,0,0,8" />
             <Button Content="High Scores"
                     Command="{Binding HighScoresCommand}"
                     Style="{StaticResource SecondaryButtonStyle}"
@@ -53,7 +59,7 @@
 
         <!-- Version -->
         <StackPanel Grid.Row="4" HorizontalAlignment="Center" Margin="0,0,0,16">
-            <TextBlock Text="v1.0.2"
+            <TextBlock Text="v1.5"
                        Style="{StaticResource CaptionStyle}"
                        HorizontalAlignment="Center" />
             <TextBlock Text="Randy Northrup"

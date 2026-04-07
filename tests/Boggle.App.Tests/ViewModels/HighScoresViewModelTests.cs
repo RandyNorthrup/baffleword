@@ -17,12 +17,15 @@ public sealed class HighScoresViewModelTests
     private readonly Mock<IHighScoreService> _highScoreService = new();
     private readonly Mock<INavigationService> _navigation = new();
 
+    public HighScoresViewModelTests()
+    {
+        _highScoreService.Setup(s => s.GetTopScoresAsync(It.IsAny<GameMode>(), It.IsAny<int>()))
+            .ReturnsAsync(new List<HighScoreEntry>());
+    }
+
     [Fact]
     public void BackCommand_NavigatesToMainMenu()
     {
-        _highScoreService.Setup(s => s.GetTopScoresAsync(It.IsAny<TimeSpan>(), It.IsAny<int>()))
-            .ReturnsAsync(new List<HighScoreEntry>());
-
         var sut = new HighScoresViewModel(_highScoreService.Object, _navigation.Object);
 
         sut.BackCommand.Execute(null);
@@ -33,9 +36,6 @@ public sealed class HighScoresViewModelTests
     [Fact]
     public void Scores_InitiallyEmpty()
     {
-        _highScoreService.Setup(s => s.GetTopScoresAsync(It.IsAny<TimeSpan>(), It.IsAny<int>()))
-            .ReturnsAsync(new List<HighScoreEntry>());
-
         var sut = new HighScoresViewModel(_highScoreService.Object, _navigation.Object);
 
         sut.Scores.Should().BeEmpty();
@@ -50,7 +50,7 @@ public sealed class HighScoresViewModelTests
             new() { Score = 80, WordsFound = 8, LongestWord = "word", AchievedAt = DateTime.Now },
         };
 
-        _highScoreService.Setup(s => s.GetTopScoresAsync(It.IsAny<TimeSpan>(), It.IsAny<int>()))
+        _highScoreService.Setup(s => s.GetTopScoresAsync(It.IsAny<GameMode>(), It.IsAny<int>()))
             .ReturnsAsync(entries);
 
         var sut = new HighScoresViewModel(_highScoreService.Object, _navigation.Object);
@@ -59,6 +59,28 @@ public sealed class HighScoresViewModelTests
         await Task.Delay(100);
 
         sut.Scores.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public void SelectedMode_DefaultsToStandard()
+    {
+        var sut = new HighScoresViewModel(_highScoreService.Object, _navigation.Object);
+
+        sut.SelectedMode.Should().Be(GameMode.Standard);
+        sut.IsStandardSelected.Should().BeTrue();
+        sut.IsBigBoggleSelected.Should().BeFalse();
+        sut.IsSuperBigBoggleSelected.Should().BeFalse();
+    }
+
+    [Fact]
+    public void ShowBigBoggleCommand_ChangesSelectedMode()
+    {
+        var sut = new HighScoresViewModel(_highScoreService.Object, _navigation.Object);
+
+        sut.ShowBigBoggleCommand.Execute(null);
+
+        sut.SelectedMode.Should().Be(GameMode.BigBoggle);
+        sut.IsBigBoggleSelected.Should().BeTrue();
     }
 
     [Fact]

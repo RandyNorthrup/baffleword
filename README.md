@@ -1,21 +1,31 @@
 # Boggle — Single Player Word Game
 
-A polished WPF desktop Boggle game built with .NET 9, featuring a clean MVVM architecture, animations, audio, achievements, and persistent high scores.
+A polished WPF desktop Boggle game built with .NET 9, featuring three game modes, MVVM architecture, drag-to-select, animations, audio, achievements, and persistent high scores.
 
 ## Features
 
-- **Classic Boggle gameplay** — Find words on a 4×4 letter grid by connecting adjacent tiles
-- **NWL2020 dictionary** — Official North American Scrabble tournament word list (191,745 words)
-- **Trie-based word validation** — Fast prefix and full-word lookups
+- **Three game modes** — Standard (4×4), Big Boggle (5×5), and Super Big Boggle (6×6 with blocked tiles and digraph dice)
+- **Drag-to-select** — Click and drag across adjacent tiles to form words, with visual path lines
+- **NWL2020 dictionary** — 191,745 words from the official North American Scrabble tournament word list, with Trie-based prefix and full-word lookups
 - **Board solver** — Finds all possible words on any board via DFS traversal
-- **Configurable settings** — Timer duration (60–600s), minimum word length (3–5), SFX/music volume
-- **High scores** — Persistent SQLite leaderboard with top 50 scores
-- **20 achievements** — Unlock milestones like First Words, Centurion, Monster Word, Streak Master
+- **High scores** — Persistent SQLite leaderboard with top 50 scores per game mode
+- **26 achievements** — Unlock milestones across all three game modes
 - **Audio system** — 13 sound effects + ambient music loop via NAudio
 - **Animations** — Board roll-in, timer pulse, word feedback, view transitions, button micro-interactions
 - **Pause/resume** — Pause mid-round without losing progress
+- **Settings** — Adjustable SFX and music volume
+
+## Game Modes
+
+| Mode | Grid | Min Word Length | Timer | Notes |
+|------|------|----------------|-------|-------|
+| Standard | 4×4 | 3 letters | 3 min | Classic Boggle |
+| Big Boggle | 5×5 | 4 letters | 3 min | Larger grid, longer words |
+| Super Big Boggle | 6×6 | 4 letters | 4 min | Blocked tiles, digraph dice |
 
 ## Scoring
+
+### Standard & Big Boggle
 
 | Word Length | Points |
 |-------------|--------|
@@ -24,6 +34,17 @@ A polished WPF desktop Boggle game built with .NET 9, featuring a clean MVVM arc
 | 6 letters   | 3      |
 | 7 letters   | 5      |
 | 8+ letters  | 11     |
+
+### Super Big Boggle
+
+| Word Length | Points |
+|-------------|--------|
+| 4 letters   | 1      |
+| 5 letters   | 2      |
+| 6 letters   | 3      |
+| 7 letters   | 5      |
+| 8 letters   | 11     |
+| 9+ letters  | 2 per letter |
 
 ## Prerequisites
 
@@ -34,7 +55,7 @@ A polished WPF desktop Boggle game built with .NET 9, featuring a clean MVVM arc
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/boggle.git
+git clone https://github.com/RandyNorthrup/boggle.git
 cd boggle
 
 # Build
@@ -50,9 +71,9 @@ dotnet run --project src/Boggle.App
 dotnet test
 ```
 
-242 tests across 4 test projects:
-- **Boggle.Core.Tests** (139) — Game engine, board generation, scoring, dictionary, achievements, statistics
-- **Boggle.App.Tests** (78) — ViewModels, navigation, settings, commands
+312 tests across 4 test projects:
+- **Boggle.Core.Tests** (207) — Game engine, board generation, scoring, dictionary, achievements, statistics
+- **Boggle.App.Tests** (80) — ViewModels, navigation, converters, commands
 - **Boggle.Data.Tests** (20) — SQLite repositories, settings persistence
 - **Boggle.Audio.Tests** (5) — Audio manager interface tests
 

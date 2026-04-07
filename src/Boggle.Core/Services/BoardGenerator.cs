@@ -37,30 +37,34 @@ public sealed class BoardGenerator : IBoardGenerator
 
     /// <inheritdoc/>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5394:Do not use insecure randomness", Justification = "Game board generation does not require cryptographic randomness.")]
-    public GameBoard Generate()
+    public GameBoard Generate(GameMode mode = GameMode.Standard)
     {
-        _logger.LogDebug("Generating new game board");
+        _logger.LogDebug("Generating new {Mode} game board", mode);
+
+        GameModeConfig config = GameModeConfig.ForMode(mode);
+        int gridSize = config.GridSize;
 
         // Copy dice list and shuffle using Fisher-Yates
-        Die[] dice = DiceSet.StandardDice.ToArray();
+        Die[] dice = config.Dice.ToArray();
         FisherYatesShuffle(dice);
 
         // Roll each die and place in grid
-        BoardCell[][] cells = new BoardCell[GameBoard.Rows][];
-        for (int row = 0; row < GameBoard.Rows; row++)
+        BoardCell[][] cells = new BoardCell[gridSize][];
+        for (int row = 0; row < gridSize; row++)
         {
-            cells[row] = new BoardCell[GameBoard.Columns];
+            cells[row] = new BoardCell[gridSize];
         }
 
-        for (int i = 0; i < GameBoard.TotalCells; i++)
+        for (int i = 0; i < gridSize * gridSize; i++)
         {
-            int row = i / GameBoard.Columns;
-            int col = i % GameBoard.Columns;
-            string letter = dice[i].Roll(_random);
-            cells[row][col] = new BoardCell(letter, row, col);
+            int row = i / gridSize;
+            int col = i % gridSize;
+            string face = dice[i].Roll(_random);
+            bool isBlocked = string.Equals(face, DiceSet.BlockedFace, StringComparison.Ordinal);
+            cells[row][col] = new BoardCell(face, row, col, isBlocked);
         }
 
-        _logger.LogDebug("Board generated successfully");
+        _logger.LogDebug("Board generated successfully ({GridSize}×{GridSize2})", gridSize, gridSize);
         return new GameBoard(cells);
     }
 

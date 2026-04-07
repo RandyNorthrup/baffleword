@@ -28,7 +28,7 @@ public sealed class GameViewModelTests : IDisposable
     public GameViewModelTests()
     {
         _audioManager.Setup(a => a.SoundEffects).Returns(new Mock<ISoundEffectPlayer>().Object);
-        _gameEngine.Setup(g => g.StartRound(It.IsAny<TimeSpan>(), It.IsAny<int>()))
+        _gameEngine.Setup(g => g.StartRound(It.IsAny<TimeSpan>(), It.IsAny<int>(), It.IsAny<GameMode>()))
             .Returns(new GameRound(CreateTestBoard(), TimeSpan.FromMinutes(3), 3));
         _statisticsService.Setup(s => s.GetStatisticsAsync())
             .ReturnsAsync(new GameStatistics());
@@ -46,7 +46,7 @@ public sealed class GameViewModelTests : IDisposable
     [Fact]
     public void Constructor_StartsRound()
     {
-        _gameEngine.Verify(g => g.StartRound(TimeSpan.FromMinutes(3), 3), Times.Once);
+        _gameEngine.Verify(g => g.StartRound(TimeSpan.FromMinutes(3), 3, It.IsAny<GameMode>()), Times.Once);
     }
 
     [Fact]
@@ -72,12 +72,11 @@ public sealed class GameViewModelTests : IDisposable
     public void Constructor_WithCustomSettings_UsesSettingValues()
     {
         var settingsRepo = new Mock<ISettingsRepository>();
-        settingsRepo.Setup(s => s.GetAsync("TimerDurationSeconds")).ReturnsAsync("120");
-        settingsRepo.Setup(s => s.GetAsync("MinWordLength")).ReturnsAsync("4");
+        settingsRepo.Setup(s => s.GetAsync("GameMode")).ReturnsAsync("BigBoggle");
 
         var gameEngine = new Mock<IGameEngine>();
-        gameEngine.Setup(g => g.StartRound(It.IsAny<TimeSpan>(), It.IsAny<int>()))
-            .Returns(new GameRound(CreateTestBoard(), TimeSpan.FromSeconds(120), 4));
+        gameEngine.Setup(g => g.StartRound(It.IsAny<TimeSpan>(), It.IsAny<int>(), It.IsAny<GameMode>()))
+            .Returns(new GameRound(CreateTestBoard(), TimeSpan.FromMinutes(3), 4));
 
         var audioManager = new Mock<IAudioManager>();
         audioManager.Setup(a => a.SoundEffects).Returns(new Mock<ISoundEffectPlayer>().Object);
@@ -91,8 +90,7 @@ public sealed class GameViewModelTests : IDisposable
             audioManager.Object,
             settingsRepo.Object);
 
-        settingsRepo.Verify(s => s.GetAsync("TimerDurationSeconds"), Times.Once);
-        settingsRepo.Verify(s => s.GetAsync("MinWordLength"), Times.Once);
+        settingsRepo.Verify(s => s.GetAsync("GameMode"), Times.Once);
     }
 
     [Fact]

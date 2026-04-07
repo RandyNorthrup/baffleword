@@ -21,8 +21,9 @@ public interface IGameEngine
     /// </summary>
     /// <param name="timerDuration">The timer duration for the round.</param>
     /// <param name="minimumWordLength">The minimum word length.</param>
+    /// <param name="mode">The game mode.</param>
     /// <returns>The newly created game round.</returns>
-    GameRound StartRound(TimeSpan timerDuration, int minimumWordLength);
+    GameRound StartRound(TimeSpan timerDuration, int minimumWordLength, GameMode mode = GameMode.Standard);
 
     /// <summary>
     /// Submits a word for validation in the current round.

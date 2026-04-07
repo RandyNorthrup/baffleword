@@ -23,12 +23,20 @@ public sealed class GameBoardTests
     }
 
     [Fact]
-    public void Constructor_WithWrongSize_ThrowsArgumentException()
+    public void Constructor_WithMismatchedColumnCounts_ThrowsArgumentException()
     {
-        BoardCell[][] cells = new BoardCell[3][];
-        for (int i = 0; i < 3; i++)
+        BoardCell[][] cells = new BoardCell[2][];
+        cells[0] = new BoardCell[3];
+        cells[1] = new BoardCell[4];
+
+        for (int col = 0; col < 3; col++)
         {
-            cells[i] = new BoardCell[3];
+            cells[0][col] = new BoardCell("A", 0, col);
+        }
+
+        for (int col = 0; col < 4; col++)
+        {
+            cells[1][col] = new BoardCell("A", 1, col);
         }
 
         Action act = () => new GameBoard(cells);
@@ -89,6 +97,53 @@ public sealed class GameBoardTests
         act.Should().Throw<ArgumentNullException>();
     }
 
+    [Fact]
+    public void Constructor_5x5Board_SetsCorrectDimensions()
+    {
+        GameBoard board = Create5x5Board();
+
+        board.Rows.Should().Be(5);
+        board.Columns.Should().Be(5);
+        board.AllCells.Should().HaveCount(25);
+    }
+
+    [Fact]
+    public void Constructor_6x6Board_SetsCorrectDimensions()
+    {
+        GameBoard board = Create6x6Board();
+
+        board.Rows.Should().Be(6);
+        board.Columns.Should().Be(6);
+        board.AllCells.Should().HaveCount(36);
+    }
+
+    [Fact]
+    public void GetNeighbors_5x5CenterCell_Returns8Neighbors()
+    {
+        GameBoard board = Create5x5Board();
+        BoardCell center = board[2, 2];
+
+        board.GetNeighbors(center).Should().HaveCount(8);
+    }
+
+    [Fact]
+    public void GetNeighbors_5x5CornerCell_Returns3Neighbors()
+    {
+        GameBoard board = Create5x5Board();
+        BoardCell corner = board[0, 0];
+
+        board.GetNeighbors(corner).Should().HaveCount(3);
+    }
+
+    [Fact]
+    public void GetNeighbors_6x6CenterCell_Returns8Neighbors()
+    {
+        GameBoard board = Create6x6Board();
+        BoardCell center = board[3, 3];
+
+        board.GetNeighbors(center).Should().HaveCount(8);
+    }
+
     private static GameBoard CreateTestBoard()
     {
         string[] letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"];
@@ -100,6 +155,36 @@ public sealed class GameBoardTests
             {
                 int i = (row * 4) + col;
                 cells[row][col] = new BoardCell(letters[i], row, col);
+            }
+        }
+
+        return new GameBoard(cells);
+    }
+
+    private static GameBoard Create5x5Board()
+    {
+        BoardCell[][] cells = new BoardCell[5][];
+        for (int row = 0; row < 5; row++)
+        {
+            cells[row] = new BoardCell[5];
+            for (int col = 0; col < 5; col++)
+            {
+                cells[row][col] = new BoardCell(((char)('A' + (((row * 5) + col) % 26))).ToString(), row, col);
+            }
+        }
+
+        return new GameBoard(cells);
+    }
+
+    private static GameBoard Create6x6Board()
+    {
+        BoardCell[][] cells = new BoardCell[6][];
+        for (int row = 0; row < 6; row++)
+        {
+            cells[row] = new BoardCell[6];
+            for (int col = 0; col < 6; col++)
+            {
+                cells[row][col] = new BoardCell(((char)('A' + (((row * 6) + col) % 26))).ToString(), row, col);
             }
         }
 

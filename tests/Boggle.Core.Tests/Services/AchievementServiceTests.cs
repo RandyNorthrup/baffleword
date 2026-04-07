@@ -19,7 +19,7 @@ public sealed class AchievementServiceTests
     {
         IReadOnlyList<Achievement> achievements = _sut.GetAllAchievements();
 
-        achievements.Should().HaveCount(20);
+        achievements.Should().HaveCount(26);
     }
 
     [Fact]

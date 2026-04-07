@@ -19,10 +19,10 @@ public interface IHighScoreService
     Task<HighScoreEntry?> TryRecordScoreAsync(GameRound round);
 
     /// <summary>
-    /// Gets the top scores for a given timer duration.
+    /// Gets the top scores for a given game mode.
     /// </summary>
-    /// <param name="timerDuration">The timer duration category.</param>
+    /// <param name="gameMode">The game mode.</param>
     /// <param name="count">The maximum number of scores to return.</param>
     /// <returns>The top scores sorted by score descending.</returns>
-    Task<IReadOnlyList<HighScoreEntry>> GetTopScoresAsync(TimeSpan timerDuration, int count = 50);
+    Task<IReadOnlyList<HighScoreEntry>> GetTopScoresAsync(GameMode gameMode, int count = 50);
 }

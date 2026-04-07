@@ -5,6 +5,7 @@
 
     <UserControl.Resources>
         <converters:TimeSpanToStringConverter x:Key="TimeSpanToString" />
+        <converters:DoubleToThicknessConverter x:Key="DoubleToThickness" />
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
     </UserControl.Resources>
 
@@ -82,18 +83,30 @@
                     </TextBlock>
 
                     <!-- Pause Button -->
-                    <Button Grid.Column="2" Content="⏸ Pause"
+                    <Button Grid.Column="2"
                             Command="{Binding PauseCommand}"
                             Style="{StaticResource SecondaryButtonStyle}"
                             HorizontalAlignment="Right"
-                            Padding="16,8" />
+                            Padding="16,8">
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Width="16" Height="16" Margin="0,0,6,0">
+                                <Canvas Width="48" Height="48">
+                                    <Path Fill="{StaticResource PrimaryBlueBrush}" Data="M20,24H10V8c0-1.1,0.9-2,2-2h6c1.1,0,2,0.9,2,2V24z"/>
+                                    <Path Fill="#3A85C2" Data="M18,42h-6c-1.1,0-2-0.9-2-2V24h10v16C20,41.1,19.1,42,18,42z"/>
+                                    <Path Fill="{StaticResource PrimaryBlueBrush}" Data="M38,24H28V8c0-1.1,0.9-2,2-2h6c1.1,0,2,0.9,2,2V24z"/>
+                                    <Path Fill="#3A85C2" Data="M36,42h-6c-1.1,0-2-0.9-2-2V24h10v16C38,41.1,37.1,42,36,42z"/>
+                                </Canvas>
+                            </Viewbox>
+                            <TextBlock Text="Pause" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                 </Grid>
             </Border>
 
             <!-- Center: Board Grid -->
             <Border Grid.Row="1" Style="{StaticResource CardStyle}"
                     Margin="16,8" HorizontalAlignment="Center" VerticalAlignment="Top"
-                    Width="344" Height="344" Padding="8">
+                    Width="{Binding BoardContainerSize}" Height="{Binding BoardContainerSize}" Padding="8">
                 <Grid>
                     <ItemsControl x:Name="BoardGrid" ItemsSource="{Binding Tiles}"
                                   PreviewMouseLeftButtonDown="BoardGrid_PreviewMouseLeftButtonDown"
@@ -102,12 +115,16 @@
                                   Background="Transparent">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <UniformGrid Rows="4" Columns="4" />
+                                <UniformGrid Rows="{Binding DataContext.BoardRows, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                             Columns="{Binding DataContext.BoardColumns, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border x:Name="TileBorder" Width="72" Height="72" Margin="4"
+                            <Border x:Name="TileBorder"
+                                    Width="{Binding DataContext.TileSize, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    Height="{Binding DataContext.TileSize, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    Margin="{Binding DataContext.TileMargin, RelativeSource={RelativeSource AncestorType=ItemsControl}, Converter={StaticResource DoubleToThickness}}"
                                     BorderThickness="2" CornerRadius="8"
                                     Cursor="Hand"
                                     RenderTransformOrigin="0.5,0.5">
@@ -127,13 +144,19 @@
                                                 <Setter Property="Background" Value="{StaticResource PrimaryBlueBrush}" />
                                                 <Setter Property="BorderBrush" Value="{StaticResource PrimaryBlueBrush}" />
                                             </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsBlocked}" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource Gray300Brush}" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource Gray500Brush}" />
+                                                <Setter Property="Cursor" Value="Arrow" />
+                                            </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
                                 <TextBlock Text="{Binding Letter}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            FontFamily="{StaticResource DefaultFont}"
-                                           FontSize="24" FontWeight="Bold">
+                                           FontSize="{Binding DataContext.TileFontSize, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                           FontWeight="Bold">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Foreground" Value="{StaticResource Gray700Brush}" />

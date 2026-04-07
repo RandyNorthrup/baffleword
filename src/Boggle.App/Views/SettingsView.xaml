@@ -16,23 +16,6 @@
         <!-- Settings Card -->
         <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="64,0" VerticalAlignment="Center">
             <StackPanel>
-                <!-- Round Timer -->
-                <TextBlock Text="Round Timer" Style="{StaticResource BodyStyle}" Margin="0,0,0,8" />
-                <UniformGrid Rows="1" Margin="0,0,0,20">
-                    <RadioButton Content="1 min" GroupName="Timer"
-                                 IsChecked="{Binding IsTimer1Min}"
-                                 Style="{StaticResource TimerPresetStyle}"
-                                 Margin="0,0,4,0" />
-                    <RadioButton Content="3 min" GroupName="Timer"
-                                 IsChecked="{Binding IsTimer3Min}"
-                                 Style="{StaticResource TimerPresetStyle}"
-                                 Margin="4,0,4,0" />
-                    <RadioButton Content="5 min" GroupName="Timer"
-                                 IsChecked="{Binding IsTimer5Min}"
-                                 Style="{StaticResource TimerPresetStyle}"
-                                 Margin="4,0,0,0" />
-                </UniformGrid>
-
                 <!-- SFX Volume -->
                 <TextBlock Text="Sound Effects Volume" Style="{StaticResource BodyStyle}" Margin="0,0,0,4" />
                 <Slider Minimum="0" Maximum="1" TickFrequency="0.1"

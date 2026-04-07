@@ -88,7 +88,7 @@ public partial class GameView : UserControl
             return false;
         }
 
-        const double margin = 12;
+        double margin = border.ActualWidth * 0.16;
         Point pos = e.GetPosition(border);
         return pos.X >= margin && pos.X <= border.ActualWidth - margin &&
                pos.Y >= margin && pos.Y <= border.ActualHeight - margin;
@@ -217,7 +217,7 @@ public partial class GameView : UserControl
 
         foreach (TileViewModel tile in selectedTiles)
         {
-            int index = (tile.Row * 4) + tile.Column;
+            int index = (tile.Row * vm.BoardColumns) + tile.Column;
             if (index < grid.Children.Count && grid.Children[index] is UIElement element)
             {
                 Point center = element.TranslatePoint(
@@ -238,7 +238,7 @@ public partial class GameView : UserControl
     private void AnimateBoardEntrance()
     {
         int delay = 0;
-        foreach (Border tile in FindVisualChildren<Border>(BoardGrid).Where(t => Math.Abs(t.Width - 72) < 0.1))
+        foreach (Border tile in FindVisualChildren<Border>(BoardGrid).Where(t => t.DataContext is TileViewModel))
         {
             tile.RenderTransformOrigin = new Point(0.5, 0.5);
             tile.RenderTransform = new ScaleTransform(0, 0);

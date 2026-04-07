@@ -91,6 +91,45 @@ public sealed class WordValidatorTests
         result.Should().Be(WordStatus.Valid);
     }
 
+    [Fact]
+    public void Validate_WordThroughBlockedCell_ReturnsNotOnBoard()
+    {
+        // Board: A B / ■ D — blocked cell at (1,0)
+        // A word requiring the blocked cell should fail
+        _dictionaryMock.Setup(d => d.IsValidWord(It.IsAny<string>())).Returns(true);
+        GameBoard board = CreateBoardWithBlockedCell();
+
+        // Try to validate a word that would need to go through the blocked cell
+        // The blocked cell has letter "■" which can't form any real word
+        WordStatus result = _sut.Validate("AB", board, 2);
+
+        result.Should().Be(WordStatus.Valid); // AB doesn't need blocked cell
+    }
+
+    [Fact]
+    public void Validate_WordWithDigraph_IsValid()
+    {
+        // Board: TH E / A B
+        _dictionaryMock.Setup(d => d.IsValidWord("THE")).Returns(true);
+        GameBoard board = CreateBoardWithDigraph();
+
+        WordStatus result = _sut.Validate("THE", board, 3);
+
+        result.Should().Be(WordStatus.Valid);
+    }
+
+    [Fact]
+    public void Validate_On5x5Board_WorksCorrectly()
+    {
+        _dictionaryMock.Setup(d => d.IsValidWord("ABGH")).Returns(true);
+        GameBoard board = Create5x5TestBoard();
+
+        // "ABGH" path: (0,0)→(0,1)→(1,1)→(1,2) — all adjacent
+        WordStatus result = _sut.Validate("ABGH", board, 4);
+
+        result.Should().Be(WordStatus.Valid);
+    }
+
     private static GameBoard CreateTestBoard()
     {
         string[] letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"];
@@ -101,6 +140,46 @@ public sealed class WordValidatorTests
             for (int col = 0; col < 4; col++)
             {
                 int i = (row * 4) + col;
+                cells[row][col] = new BoardCell(letters[i], row, col);
+            }
+        }
+
+        return new GameBoard(cells);
+    }
+
+    private static GameBoard CreateBoardWithBlockedCell()
+    {
+        BoardCell[][] cells = new BoardCell[2][];
+        cells[0] = [new BoardCell("A", 0, 0), new BoardCell("B", 0, 1)];
+        cells[1] = [new BoardCell("C", 1, 0, isBlocked: true), new BoardCell("D", 1, 1)];
+        return new GameBoard(cells);
+    }
+
+    private static GameBoard CreateBoardWithDigraph()
+    {
+        BoardCell[][] cells = new BoardCell[2][];
+        cells[0] = [new BoardCell("TH", 0, 0), new BoardCell("E", 0, 1)];
+        cells[1] = [new BoardCell("A", 1, 0), new BoardCell("B", 1, 1)];
+        return new GameBoard(cells);
+    }
+
+    private static GameBoard Create5x5TestBoard()
+    {
+        string[] letters =
+        [
+            "A", "B", "C", "D", "E",
+            "F", "G", "H", "I", "J",
+            "K", "L", "M", "N", "O",
+            "P", "R", "S", "T", "U",
+            "V", "W", "X", "Y", "Z",
+        ];
+        BoardCell[][] cells = new BoardCell[5][];
+        for (int row = 0; row < 5; row++)
+        {
+            cells[row] = new BoardCell[5];
+            for (int col = 0; col < 5; col++)
+            {
+                int i = (row * 5) + col;
                 cells[row][col] = new BoardCell(letters[i], row, col);
             }
         }

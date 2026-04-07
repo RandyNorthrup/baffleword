@@ -6,6 +6,7 @@ namespace Boggle.App.Tests.ViewModels;
 
 using Boggle.App.Navigation;
 using Boggle.App.ViewModels;
+using Boggle.Core.Repositories;
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -13,18 +14,39 @@ using Xunit;
 public sealed class MainMenuViewModelTests
 {
     private readonly Mock<INavigationService> _navigation = new();
+    private readonly Mock<ISettingsRepository> _settingsRepo = new();
     private readonly MainMenuViewModel _sut;
 
     public MainMenuViewModelTests()
     {
-        _sut = new MainMenuViewModel(_navigation.Object);
+        _settingsRepo.Setup(r => r.SetAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+        _sut = new MainMenuViewModel(_navigation.Object, _settingsRepo.Object);
     }
 
     [Fact]
-    public void NewGameCommand_NavigatesToGameViewModel()
+    public void PlayStandardCommand_SetsGameModeAndNavigates()
     {
-        _sut.NewGameCommand.Execute(null);
+        _sut.PlayStandardCommand.Execute(null);
 
+        _settingsRepo.Verify(r => r.SetAsync("GameMode", "Standard"), Times.Once);
+        _navigation.Verify(n => n.NavigateTo<GameViewModel>(), Times.Once);
+    }
+
+    [Fact]
+    public void PlayBigBoggleCommand_SetsGameModeAndNavigates()
+    {
+        _sut.PlayBigBoggleCommand.Execute(null);
+
+        _settingsRepo.Verify(r => r.SetAsync("GameMode", "BigBoggle"), Times.Once);
+        _navigation.Verify(n => n.NavigateTo<GameViewModel>(), Times.Once);
+    }
+
+    [Fact]
+    public void PlaySuperBigBoggleCommand_SetsGameModeAndNavigates()
+    {
+        _sut.PlaySuperBigBoggleCommand.Execute(null);
+
+        _settingsRepo.Verify(r => r.SetAsync("GameMode", "SuperBigBoggle"), Times.Once);
         _navigation.Verify(n => n.NavigateTo<GameViewModel>(), Times.Once);
     }
 
@@ -63,7 +85,9 @@ public sealed class MainMenuViewModelTests
     [Fact]
     public void AllCommands_AreNotNull()
     {
-        _sut.NewGameCommand.Should().NotBeNull();
+        _sut.PlayStandardCommand.Should().NotBeNull();
+        _sut.PlayBigBoggleCommand.Should().NotBeNull();
+        _sut.PlaySuperBigBoggleCommand.Should().NotBeNull();
         _sut.HighScoresCommand.Should().NotBeNull();
         _sut.AchievementsCommand.Should().NotBeNull();
         _sut.HowToPlayCommand.Should().NotBeNull();
@@ -73,7 +97,15 @@ public sealed class MainMenuViewModelTests
     [Fact]
     public void Constructor_WithNullNavigation_ThrowsArgumentNullException()
     {
-        Action act = () => new MainMenuViewModel(null!);
+        Action act = () => new MainMenuViewModel(null!, _settingsRepo.Object);
+
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void Constructor_WithNullSettingsRepository_ThrowsArgumentNullException()
+    {
+        Action act = () => new MainMenuViewModel(_navigation.Object, null!);
 
         act.Should().Throw<ArgumentNullException>();
     }

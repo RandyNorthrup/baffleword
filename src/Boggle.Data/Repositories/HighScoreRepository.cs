@@ -39,8 +39,8 @@ public sealed class HighScoreRepository : IHighScoreRepository
 
         using SqliteCommand command = connection.CreateCommand();
         command.CommandText = """
-            INSERT INTO HighScores (Score, WordsFound, LongestWord, CompletionPercentage, TimerDurationSeconds, AchievedAt)
-            VALUES (@Score, @WordsFound, @LongestWord, @CompletionPercentage, @TimerDurationSeconds, @AchievedAt)
+            INSERT INTO HighScores (Score, WordsFound, LongestWord, CompletionPercentage, TimerDurationSeconds, GameMode, AchievedAt)
+            VALUES (@Score, @WordsFound, @LongestWord, @CompletionPercentage, @TimerDurationSeconds, @GameMode, @AchievedAt)
             """;
 
         command.Parameters.AddWithValue("@Score", entry.Score);
@@ -48,6 +48,7 @@ public sealed class HighScoreRepository : IHighScoreRepository
         command.Parameters.AddWithValue("@LongestWord", entry.LongestWord);
         command.Parameters.AddWithValue("@CompletionPercentage", entry.CompletionPercentage);
         command.Parameters.AddWithValue("@TimerDurationSeconds", (int)entry.TimerDuration.TotalSeconds);
+        command.Parameters.AddWithValue("@GameMode", entry.GameMode.ToString());
         command.Parameters.AddWithValue("@AchievedAt", entry.AchievedAt.ToString("O", CultureInfo.InvariantCulture));
 
         await command.ExecuteNonQueryAsync().ConfigureAwait(false);
@@ -55,21 +56,21 @@ public sealed class HighScoreRepository : IHighScoreRepository
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<HighScoreEntry>> GetTopAsync(int timerDurationSeconds, int count)
+    public async Task<IReadOnlyList<HighScoreEntry>> GetTopAsync(string gameMode, int count)
     {
         using SqliteConnection connection = _database.CreateConnection();
         await connection.OpenAsync().ConfigureAwait(false);
 
         using SqliteCommand command = connection.CreateCommand();
         command.CommandText = """
-            SELECT Id, Score, WordsFound, LongestWord, CompletionPercentage, TimerDurationSeconds, AchievedAt
+            SELECT Id, Score, WordsFound, LongestWord, CompletionPercentage, TimerDurationSeconds, GameMode, AchievedAt
             FROM HighScores
-            WHERE TimerDurationSeconds = @TimerDurationSeconds
+            WHERE GameMode = @GameMode
             ORDER BY Score DESC
             LIMIT @Count
             """;
 
-        command.Parameters.AddWithValue("@TimerDurationSeconds", timerDurationSeconds);
+        command.Parameters.AddWithValue("@GameMode", gameMode);
         command.Parameters.AddWithValue("@Count", count);
 
         var entries = new List<HighScoreEntry>();
@@ -83,7 +84,7 @@ public sealed class HighScoreRepository : IHighScoreRepository
     }
 
     /// <inheritdoc/>
-    public async Task<int> GetMinimumTopScoreAsync(int timerDurationSeconds, int topN)
+    public async Task<int> GetMinimumTopScoreAsync(string gameMode, int topN)
     {
         using SqliteConnection connection = _database.CreateConnection();
         await connection.OpenAsync().ConfigureAwait(false);
@@ -92,13 +93,13 @@ public sealed class HighScoreRepository : IHighScoreRepository
         command.CommandText = """
             SELECT MIN(Score) FROM (
                 SELECT Score FROM HighScores
-                WHERE TimerDurationSeconds = @TimerDurationSeconds
+                WHERE GameMode = @GameMode
                 ORDER BY Score DESC
                 LIMIT @TopN
             )
             """;
 
-        command.Parameters.AddWithValue("@TimerDurationSeconds", timerDurationSeconds);
+        command.Parameters.AddWithValue("@GameMode", gameMode);
         command.Parameters.AddWithValue("@TopN", topN);
 
         object? result = await command.ExecuteScalarAsync().ConfigureAwait(false);
@@ -120,6 +121,9 @@ public sealed class HighScoreRepository : IHighScoreRepository
 
     private static HighScoreEntry ReadHighScoreEntry(SqliteDataReader reader)
     {
+        string gameModeStr = reader.GetString(6);
+        GameMode gameMode = Enum.TryParse<GameMode>(gameModeStr, out GameMode gm) ? gm : GameMode.Standard;
+
         return new HighScoreEntry
         {
             Id = reader.GetInt32(0),
@@ -128,7 +132,8 @@ public sealed class HighScoreRepository : IHighScoreRepository
             LongestWord = reader.GetString(3),
             CompletionPercentage = reader.GetDouble(4),
             TimerDuration = TimeSpan.FromSeconds(reader.GetInt32(5)),
-            AchievedAt = DateTime.Parse(reader.GetString(6), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
+            GameMode = gameMode,
+            AchievedAt = DateTime.Parse(reader.GetString(7), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
         };
     }
 }

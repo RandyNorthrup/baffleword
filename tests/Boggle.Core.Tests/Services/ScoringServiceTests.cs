@@ -4,6 +4,7 @@
 
 namespace Boggle.Core.Tests.Services;
 
+using Boggle.Core.Models;
 using Boggle.Core.Services;
 using FluentAssertions;
 using Xunit;
@@ -52,5 +53,27 @@ public sealed class ScoringServiceTests
     public void GetEffectiveLength_Null_ReturnsZero()
     {
         _sut.GetEffectiveLength(null!).Should().Be(0);
+    }
+
+    [Theory]
+    [InlineData("CAT", 0)] // 3 letters = 0 in Super Big (min 4)
+    [InlineData("CATS", 1)] // 4 letters = 1 point
+    [InlineData("CATCH", 2)] // 5 letters = 2 points
+    [InlineData("CATHER", 3)] // 6 letters = 3 points
+    [InlineData("CATCHES", 5)] // 7 letters = 5 points
+    [InlineData("CATCHING", 11)] // 8 letters = 11 points
+    [InlineData("CATCHINGS", 18)] // 9 letters = 9 * 2 = 18 points
+    [InlineData("OUTMATCHING", 22)] // 11 letters = 11 * 2 = 22 points
+    public void CalculateWordScore_SuperBigBoggle_ReturnsCorrectPoints(string word, int expectedPoints)
+    {
+        _sut.CalculateWordScore(word, GameMode.SuperBigBoggle).Should().Be(expectedPoints);
+    }
+
+    [Theory]
+    [InlineData("CAT", 1)] // Standard scoring unchanged
+    [InlineData("CATCH", 2)]
+    public void CalculateWordScore_BigBoggle_UsesSameAsStandard(string word, int expectedPoints)
+    {
+        _sut.CalculateWordScore(word, GameMode.BigBoggle).Should().Be(expectedPoints);
     }
 }

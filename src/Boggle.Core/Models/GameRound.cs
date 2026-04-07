@@ -17,7 +17,8 @@ public sealed class GameRound
     /// <param name="board">The game board for this round.</param>
     /// <param name="timerDuration">The total timer duration.</param>
     /// <param name="minimumWordLength">The minimum word length required.</param>
-    public GameRound(GameBoard board, TimeSpan timerDuration, int minimumWordLength)
+    /// <param name="mode">The game mode for this round.</param>
+    public GameRound(GameBoard board, TimeSpan timerDuration, int minimumWordLength, GameMode mode = GameMode.Standard)
     {
         ArgumentNullException.ThrowIfNull(board);
         ArgumentOutOfRangeException.ThrowIfLessThan(minimumWordLength, 3);
@@ -25,6 +26,7 @@ public sealed class GameRound
         Board = board;
         TimerDuration = timerDuration;
         MinimumWordLength = minimumWordLength;
+        Mode = mode;
         StartedAt = DateTime.UtcNow;
         State = GameRoundState.Playing;
     }
@@ -33,6 +35,11 @@ public sealed class GameRound
     /// Gets the game board for this round.
     /// </summary>
     public GameBoard Board { get; }
+
+    /// <summary>
+    /// Gets the game mode for this round.
+    /// </summary>
+    public GameMode Mode { get; }
 
     /// <summary>
     /// Gets the timer duration.

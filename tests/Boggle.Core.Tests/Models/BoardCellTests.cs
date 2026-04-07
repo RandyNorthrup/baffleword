@@ -34,8 +34,6 @@ public sealed class BoardCellTests
     [Theory]
     [InlineData(-1, 0)]
     [InlineData(0, -1)]
-    [InlineData(4, 0)]
-    [InlineData(0, 4)]
     public void Constructor_WithInvalidPosition_ThrowsArgumentOutOfRangeException(int row, int col)
     {
         Action act = () => new BoardCell("A", row, col);
@@ -90,5 +88,76 @@ public sealed class BoardCellTests
         Action act = () => cell.IsAdjacentTo(null!);
 
         act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void Constructor_WithBlocked_SetsIsBlockedTrue()
+    {
+        var cell = new BoardCell("X", 0, 0, isBlocked: true);
+
+        cell.IsBlocked.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Constructor_WithBlocked_SetsLetterToBlockedFace()
+    {
+        var cell = new BoardCell("X", 0, 0, isBlocked: true);
+
+        cell.Letter.Should().Be(DiceSet.BlockedFace);
+    }
+
+    [Fact]
+    public void IsBlocked_DefaultIsFalse()
+    {
+        var cell = new BoardCell("A", 0, 0);
+
+        cell.IsBlocked.Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsDigraph_ReturnsTrueForTwoLetterCell()
+    {
+        var cell = new BoardCell("TH", 0, 0);
+
+        cell.IsDigraph.Should().BeTrue();
+    }
+
+    [Fact]
+    public void IsDigraph_ReturnsFalseForSingleLetterCell()
+    {
+        var cell = new BoardCell("A", 0, 0);
+
+        cell.IsDigraph.Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsDigraph_ReturnsFalseForBlockedCell()
+    {
+        var cell = new BoardCell("X", 0, 0, isBlocked: true);
+
+        cell.IsDigraph.Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData("QU")]
+    [InlineData("IN")]
+    [InlineData("TH")]
+    [InlineData("ER")]
+    [InlineData("HE")]
+    [InlineData("AN")]
+    public void IsDigraph_ReturnsTrueForSuperBigBoggleDigraphs(string digraph)
+    {
+        var cell = new BoardCell(digraph, 0, 0);
+
+        cell.IsDigraph.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Constructor_AllowsLargePositions()
+    {
+        var cell = new BoardCell("A", 5, 5);
+
+        cell.Row.Should().Be(5);
+        cell.Column.Should().Be(5);
     }
 }

@@ -37,17 +37,20 @@ public sealed class BoardSolver : IBoardSolver
         _logger.LogDebug("Solving board with minimum word length {MinLength}", minimumLength);
 
         HashSet<string> foundWords = new(StringComparer.OrdinalIgnoreCase);
-        bool[][] visited = new bool[GameBoard.Rows][];
-        for (int i = 0; i < GameBoard.Rows; i++)
+        bool[][] visited = new bool[board.Rows][];
+        for (int i = 0; i < board.Rows; i++)
         {
-            visited[i] = new bool[GameBoard.Columns];
+            visited[i] = new bool[board.Columns];
         }
 
-        StringBuilder currentWord = new(GameBoard.TotalCells);
+        StringBuilder currentWord = new(board.TotalCells);
 
         foreach (BoardCell cell in board.AllCells)
         {
-            DfsSolve(board, cell, visited, currentWord, foundWords, minimumLength);
+            if (!cell.IsBlocked)
+            {
+                DfsSolve(board, cell, visited, currentWord, foundWords, minimumLength);
+            }
         }
 
         List<string> result = [.. foundWords.OrderBy(w => w.Length).ThenBy(w => w, StringComparer.OrdinalIgnoreCase)];
@@ -64,15 +67,7 @@ public sealed class BoardSolver : IBoardSolver
         int minimumLength)
     {
         visited[cell.Row][cell.Column] = true;
-
-        if (cell.IsQu)
-        {
-            currentWord.Append("QU");
-        }
-        else
-        {
-            currentWord.Append(cell.Letter);
-        }
+        currentWord.Append(cell.Letter);
 
         string prefix = currentWord.ToString();
 
@@ -85,7 +80,7 @@ public sealed class BoardSolver : IBoardSolver
 
             foreach (BoardCell neighbor in board.GetNeighbors(cell))
             {
-                if (!visited[neighbor.Row][neighbor.Column])
+                if (!neighbor.IsBlocked && !visited[neighbor.Row][neighbor.Column])
                 {
                     DfsSolve(board, neighbor, visited, currentWord, foundWords, minimumLength);
                 }
@@ -93,15 +88,7 @@ public sealed class BoardSolver : IBoardSolver
         }
 
         // Backtrack
-        if (cell.IsQu)
-        {
-            currentWord.Length -= 2;
-        }
-        else
-        {
-            currentWord.Length -= cell.Letter.Length;
-        }
-
+        currentWord.Length -= cell.Letter.Length;
         visited[cell.Row][cell.Column] = false;
     }
 }

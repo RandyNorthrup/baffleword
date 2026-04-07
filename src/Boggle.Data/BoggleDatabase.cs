@@ -50,6 +50,7 @@ public sealed class BoggleDatabase : IBoggleDatabase
                 LongestWord TEXT NOT NULL DEFAULT '',
                 CompletionPercentage REAL NOT NULL DEFAULT 0,
                 TimerDurationSeconds INTEGER NOT NULL,
+                GameMode TEXT NOT NULL DEFAULT 'Standard',
                 AchievedAt TEXT NOT NULL
             );
 
@@ -72,10 +73,23 @@ public sealed class BoggleDatabase : IBoggleDatabase
             );
 
             CREATE INDEX IF NOT EXISTS IX_HighScores_Score
-                ON HighScores(TimerDurationSeconds, Score DESC);
+                ON HighScores(GameMode, Score DESC);
             """;
 
         await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+
+        // Migrate existing databases: add GameMode column if it doesn't exist
+        using SqliteCommand migrateCommand = connection.CreateCommand();
+        migrateCommand.CommandText = "ALTER TABLE HighScores ADD COLUMN GameMode TEXT NOT NULL DEFAULT 'Standard'";
+        try
+        {
+            await migrateCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+        }
+        catch (SqliteException)
+        {
+            // Column already exists — ignore
+        }
+
         _logger.LogInformation("Database initialized successfully");
     }
 

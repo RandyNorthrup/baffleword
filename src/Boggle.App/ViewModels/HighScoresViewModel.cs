@@ -17,6 +17,7 @@ public sealed class HighScoresViewModel : ViewModelBase
 {
     private readonly IHighScoreService _highScoreService;
     private readonly INavigationService _navigation;
+    private GameMode _selectedMode = GameMode.Standard;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HighScoresViewModel"/> class.
@@ -29,6 +30,9 @@ public sealed class HighScoresViewModel : ViewModelBase
         _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
 
         BackCommand = new RelayCommand(OnBack);
+        ShowStandardCommand = new RelayCommand(() => _ = SelectModeAsync(GameMode.Standard));
+        ShowBigBoggleCommand = new RelayCommand(() => _ = SelectModeAsync(GameMode.BigBoggle));
+        ShowSuperBigBoggleCommand = new RelayCommand(() => _ = SelectModeAsync(GameMode.SuperBigBoggle));
         Scores = [];
         _ = LoadScoresAsync();
     }
@@ -39,13 +43,66 @@ public sealed class HighScoresViewModel : ViewModelBase
     public ObservableCollection<HighScoreEntry> Scores { get; }
 
     /// <summary>
+    /// Gets the currently selected game mode for filtering.
+    /// </summary>
+    public GameMode SelectedMode
+    {
+        get => _selectedMode;
+        private set
+        {
+            if (SetProperty(ref _selectedMode, value))
+            {
+                OnPropertyChanged(nameof(IsStandardSelected));
+                OnPropertyChanged(nameof(IsBigBoggleSelected));
+                OnPropertyChanged(nameof(IsSuperBigBoggleSelected));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether Standard mode is selected.
+    /// </summary>
+    public bool IsStandardSelected => _selectedMode == GameMode.Standard;
+
+    /// <summary>
+    /// Gets a value indicating whether Big Boggle mode is selected.
+    /// </summary>
+    public bool IsBigBoggleSelected => _selectedMode == GameMode.BigBoggle;
+
+    /// <summary>
+    /// Gets a value indicating whether Super Big Boggle mode is selected.
+    /// </summary>
+    public bool IsSuperBigBoggleSelected => _selectedMode == GameMode.SuperBigBoggle;
+
+    /// <summary>
     /// Gets the command to go back to the main menu.
     /// </summary>
     public ICommand BackCommand { get; }
 
+    /// <summary>
+    /// Gets the command to show Standard scores.
+    /// </summary>
+    public ICommand ShowStandardCommand { get; }
+
+    /// <summary>
+    /// Gets the command to show Big Boggle scores.
+    /// </summary>
+    public ICommand ShowBigBoggleCommand { get; }
+
+    /// <summary>
+    /// Gets the command to show Super Big Boggle scores.
+    /// </summary>
+    public ICommand ShowSuperBigBoggleCommand { get; }
+
+    private async Task SelectModeAsync(GameMode mode)
+    {
+        SelectedMode = mode;
+        await LoadScoresAsync().ConfigureAwait(true);
+    }
+
     private async Task LoadScoresAsync()
     {
-        IReadOnlyList<HighScoreEntry> scores = await _highScoreService.GetTopScoresAsync(TimeSpan.FromMinutes(3), 50).ConfigureAwait(true);
+        IReadOnlyList<HighScoreEntry> scores = await _highScoreService.GetTopScoresAsync(_selectedMode, 50).ConfigureAwait(true);
         Scores.Clear();
         foreach (HighScoreEntry entry in scores)
         {

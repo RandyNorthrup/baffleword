@@ -16,13 +16,15 @@ public sealed class TileViewModel : ViewModelBase
     /// Initializes a new instance of the <see cref="TileViewModel"/> class.
     /// </summary>
     /// <param name="letter">The letter displayed on this tile.</param>
-    /// <param name="row">The row position (0-3).</param>
-    /// <param name="column">The column position (0-3).</param>
-    public TileViewModel(string letter, int row, int column)
+    /// <param name="row">The row position.</param>
+    /// <param name="column">The column position.</param>
+    /// <param name="isBlocked">Whether this tile is a blocked position.</param>
+    public TileViewModel(string letter, int row, int column, bool isBlocked = false)
     {
         Letter = letter;
         Row = row;
         Column = column;
+        IsBlocked = isBlocked;
     }
 
     /// <summary>
@@ -39,6 +41,11 @@ public sealed class TileViewModel : ViewModelBase
     /// Gets the column position.
     /// </summary>
     public int Column { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether this tile is a blocked position.
+    /// </summary>
+    public bool IsBlocked { get; }
 
     /// <summary>
     /// Gets or sets a value indicating whether this tile is part of the current selection.

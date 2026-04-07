@@ -13,35 +13,45 @@ public sealed class BoardCell
     /// Initializes a new instance of the <see cref="BoardCell"/> class.
     /// </summary>
     /// <param name="letter">The letter displayed on this cell.</param>
-    /// <param name="row">The row position (0-3).</param>
-    /// <param name="column">The column position (0-3).</param>
-    public BoardCell(string letter, int row, int column)
+    /// <param name="row">The row position.</param>
+    /// <param name="column">The column position.</param>
+    /// <param name="isBlocked">Whether this cell is a blocked position.</param>
+    public BoardCell(string letter, int row, int column, bool isBlocked = false)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(letter);
+        ArgumentNullException.ThrowIfNull(letter);
         ArgumentOutOfRangeException.ThrowIfNegative(row);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(row, 3);
         ArgumentOutOfRangeException.ThrowIfNegative(column);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(column, 3);
 
-        Letter = letter.ToUpperInvariant();
+        IsBlocked = isBlocked;
+        Letter = isBlocked ? DiceSet.BlockedFace : letter.ToUpperInvariant();
         Row = row;
         Column = column;
     }
 
     /// <summary>
-    /// Gets the letter displayed on this cell (e.g., "A", "Qu").
+    /// Gets the letter displayed on this cell (e.g., "A", "QU", "TH", "■").
     /// </summary>
     public string Letter { get; }
 
     /// <summary>
-    /// Gets the row position (0-3).
+    /// Gets the row position.
     /// </summary>
     public int Row { get; }
 
     /// <summary>
-    /// Gets the column position (0-3).
+    /// Gets the column position.
     /// </summary>
     public int Column { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether this cell is a blocked position (cannot be used in words).
+    /// </summary>
+    public bool IsBlocked { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether this cell contains a two-letter digraph (e.g., "QU", "TH", "IN").
+    /// </summary>
+    public bool IsDigraph => !IsBlocked && Letter.Length > 1;
 
     /// <summary>
     /// Gets a value indicating whether this cell contains the "Qu" digraph.

@@ -6,7 +6,6 @@ namespace Boggle.App.ViewModels;
 
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -42,6 +41,12 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
     private bool _isDragging;
 
     private bool _isTimerWarning;
+    private int _boardRows = 4;
+    private int _boardColumns = 4;
+    private double _tileSize = 72;
+    private double _tileMargin = 4;
+    private double _tileFontSize = 24;
+    private double _boardContainerSize = 344;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GameViewModel"/> class.
@@ -168,7 +173,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
     }
 
     /// <summary>
-    /// Gets the 4x4 board letters for display.
+    /// Gets the board letters for display.
     /// </summary>
     public string[][] BoardLetters
     {
@@ -201,6 +206,60 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
     }
 
     /// <summary>
+    /// Gets the number of board rows.
+    /// </summary>
+    public int BoardRows
+    {
+        get => _boardRows;
+        private set => SetProperty(ref _boardRows, value);
+    }
+
+    /// <summary>
+    /// Gets the number of board columns.
+    /// </summary>
+    public int BoardColumns
+    {
+        get => _boardColumns;
+        private set => SetProperty(ref _boardColumns, value);
+    }
+
+    /// <summary>
+    /// Gets the tile size in pixels.
+    /// </summary>
+    public double TileSize
+    {
+        get => _tileSize;
+        private set => SetProperty(ref _tileSize, value);
+    }
+
+    /// <summary>
+    /// Gets the tile margin in pixels.
+    /// </summary>
+    public double TileMargin
+    {
+        get => _tileMargin;
+        private set => SetProperty(ref _tileMargin, value);
+    }
+
+    /// <summary>
+    /// Gets the tile font size.
+    /// </summary>
+    public double TileFontSize
+    {
+        get => _tileFontSize;
+        private set => SetProperty(ref _tileFontSize, value);
+    }
+
+    /// <summary>
+    /// Gets the board container size.
+    /// </summary>
+    public double BoardContainerSize
+    {
+        get => _boardContainerSize;
+        private set => SetProperty(ref _boardContainerSize, value);
+    }
+
+    /// <summary>
     /// Gets the command to submit a word.
     /// </summary>
     public ICommand SubmitWordCommand { get; }
@@ -226,7 +285,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
     /// <param name="tile">The tile where the drag started.</param>
     public void BeginDragSelection(TileViewModel tile)
     {
-        if (IsPaused || tile is null)
+        if (IsPaused || tile is null || tile.IsBlocked)
         {
             return;
         }
@@ -242,7 +301,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
     /// <param name="tile">The tile being dragged over.</param>
     public void ExtendDragSelection(TileViewModel tile)
     {
-        if (!IsDragging || tile is null || IsPaused)
+        if (!IsDragging || tile is null || IsPaused || tile.IsBlocked)
         {
             return;
         }
@@ -301,48 +360,77 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
 
     private async Task InitializeAsync()
     {
-        int timerSeconds = 180;
-        int minWordLength = 3;
+        GameMode mode = GameMode.Standard;
 
-        string? timerSetting = await _settingsRepository.GetAsync("TimerDurationSeconds").ConfigureAwait(true);
-        if (timerSetting != null && int.TryParse(timerSetting, CultureInfo.InvariantCulture, out int ts))
+        string? modeSetting = await _settingsRepository.GetAsync("GameMode").ConfigureAwait(true);
+        if (modeSetting != null && Enum.TryParse<GameMode>(modeSetting, out GameMode gm))
         {
-            timerSeconds = Math.Clamp(ts, 60, 600);
+            mode = gm;
         }
 
-        string? minWordSetting = await _settingsRepository.GetAsync("MinWordLength").ConfigureAwait(true);
-        if (minWordSetting != null && int.TryParse(minWordSetting, CultureInfo.InvariantCulture, out int mw))
-        {
-            minWordLength = Math.Clamp(mw, 3, 5);
-        }
+        GameModeConfig config = GameModeConfig.ForMode(mode);
+        int timerSeconds = config.DefaultTimerSeconds;
+        int minWordLength = config.MinWordLength;
 
-        StartNewRound(TimeSpan.FromSeconds(timerSeconds), minWordLength);
+        StartNewRound(TimeSpan.FromSeconds(timerSeconds), minWordLength, mode);
     }
 
-    private void StartNewRound(TimeSpan duration, int minWordLength)
+    private void StartNewRound(TimeSpan duration, int minWordLength, GameMode mode = GameMode.Standard)
     {
-        _currentRound = _gameEngine.StartRound(duration, minWordLength);
+        _currentRound = _gameEngine.StartRound(duration, minWordLength, mode);
         TimerDuration = duration;
         TimeRemaining = duration;
         Score = 0;
         FoundWords.Clear();
 
         GameBoard board = _currentRound.Board;
-        string[][] letters = new string[GameBoard.Rows][];
+        BoardRows = board.Rows;
+        BoardColumns = board.Columns;
+
+        // Calculate tile sizing based on board dimensions
+        UpdateBoardSizing(board.Rows);
+
+        string[][] letters = new string[board.Rows][];
         Tiles.Clear();
-        for (int row = 0; row < GameBoard.Rows; row++)
+        for (int row = 0; row < board.Rows; row++)
         {
-            letters[row] = new string[GameBoard.Columns];
-            for (int col = 0; col < GameBoard.Columns; col++)
+            letters[row] = new string[board.Columns];
+            for (int col = 0; col < board.Columns; col++)
             {
-                letters[row][col] = board[row, col].Letter;
-                Tiles.Add(new TileViewModel(board[row, col].Letter, row, col));
+                BoardCell cell = board[row, col];
+                letters[row][col] = cell.Letter;
+                Tiles.Add(new TileViewModel(cell.Letter, row, col, cell.IsBlocked));
             }
         }
 
         BoardLetters = letters;
         _audioManager.SoundEffects.Play(SoundEffect.RoundStart);
         _timer.Start();
+    }
+
+    private void UpdateBoardSizing(int gridSize)
+    {
+        switch (gridSize)
+        {
+            case 5:
+                TileSize = 56;
+                TileMargin = 3;
+                TileFontSize = 20;
+                BoardContainerSize = 348;
+                break;
+            case 6:
+                TileSize = 46;
+                TileMargin = 3;
+                TileFontSize = 16;
+                BoardContainerSize = 352;
+                break;
+            default:
+                TileSize = 72;
+                TileMargin = 4;
+                TileFontSize = 24;
+                BoardContainerSize = 344;
+                break;
+        }
     }
 
     private void AddTileToPath(TileViewModel tile)
@@ -372,25 +460,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
 
     private void SubmitDraggedWord(string word)
     {
-        WordResult result = _gameEngine.SubmitWord(word);
-        if (result.Status == WordStatus.Valid)
-        {
-            FoundWords.Insert(0, result);
-        }
-
-        Score = _currentRound?.Score ?? 0;
-
-        _audioManager.SoundEffects.Play(result.Status == WordStatus.Valid ? SoundEffect.WordValid : SoundEffect.WordInvalid);
-
-        LastSubmissionFeedback = result.Status switch
-        {
-            WordStatus.Valid => $"+{result.Points} pts!",
-            WordStatus.AlreadyFound => "Already found!",
-            WordStatus.NotInDictionary => "Not a word!",
-            WordStatus.NotOnBoard => "Not on board!",
-            WordStatus.TooShort => "Too short!",
-            _ => string.Empty,
-        };
+        ProcessWordResult(_gameEngine.SubmitWord(word));
     }
 
     private async void OnTimerTick(object? sender, EventArgs e)
@@ -420,7 +490,12 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
             return;
         }
 
-        WordResult result = _gameEngine.SubmitWord(word);
+        ProcessWordResult(_gameEngine.SubmitWord(word));
+        CurrentWord = string.Empty;
+    }
+
+    private void ProcessWordResult(WordResult result)
+    {
         if (result.Status == WordStatus.Valid)
         {
             FoundWords.Insert(0, result);
@@ -439,8 +514,6 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
             WordStatus.TooShort => "Too short!",
             _ => string.Empty,
         };
-
-        CurrentWord = string.Empty;
     }
 
     private void OnPause()

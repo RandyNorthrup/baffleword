@@ -19,7 +19,6 @@ public sealed class SettingsViewModel : ViewModelBase
     private readonly INavigationService _navigation;
     private readonly IAudioManager _audioManager;
 
-    private int _timerDurationSeconds = 180;
     private double _sfxVolume = 0.8;
     private double _musicVolume = 0.5;
 
@@ -39,68 +38,6 @@ public sealed class SettingsViewModel : ViewModelBase
         BackCommand = new RelayCommand(OnBack);
 
         _ = LoadSettingsAsync();
-    }
-
-    /// <summary>
-    /// Gets or sets the timer duration in seconds.
-    /// </summary>
-    public int TimerDurationSeconds
-    {
-        get => _timerDurationSeconds;
-        set
-        {
-            if (SetProperty(ref _timerDurationSeconds, value))
-            {
-                OnPropertyChanged(nameof(IsTimer1Min));
-                OnPropertyChanged(nameof(IsTimer3Min));
-                OnPropertyChanged(nameof(IsTimer5Min));
-            }
-        }
-    }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the 1-minute preset is selected.
-    /// </summary>
-    public bool IsTimer1Min
-    {
-        get => _timerDurationSeconds == 60;
-        set
-        {
-            if (value)
-            {
-                TimerDurationSeconds = 60;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the 3-minute preset is selected.
-    /// </summary>
-    public bool IsTimer3Min
-    {
-        get => _timerDurationSeconds == 180;
-        set
-        {
-            if (value)
-            {
-                TimerDurationSeconds = 180;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the 5-minute preset is selected.
-    /// </summary>
-    public bool IsTimer5Min
-    {
-        get => _timerDurationSeconds == 300;
-        set
-        {
-            if (value)
-            {
-                TimerDurationSeconds = 300;
-            }
-        }
     }
 
     /// <summary>
@@ -145,12 +82,6 @@ public sealed class SettingsViewModel : ViewModelBase
 
     private async Task LoadSettingsAsync()
     {
-        string? timer = await _settingsRepository.GetAsync("TimerDurationSeconds").ConfigureAwait(true);
-        if (timer != null && int.TryParse(timer, CultureInfo.InvariantCulture, out int t))
-        {
-            TimerDurationSeconds = t;
-        }
-
         string? sfx = await _settingsRepository.GetAsync("SfxVolume").ConfigureAwait(true);
         if (sfx != null && double.TryParse(sfx, CultureInfo.InvariantCulture, out double sv))
         {
@@ -166,7 +97,6 @@ public sealed class SettingsViewModel : ViewModelBase
 
     private async Task SaveAsync()
     {
-        await _settingsRepository.SetAsync("TimerDurationSeconds", TimerDurationSeconds.ToString(CultureInfo.InvariantCulture)).ConfigureAwait(true);
         await _settingsRepository.SetAsync("SfxVolume", SfxVolume.ToString(CultureInfo.InvariantCulture)).ConfigureAwait(true);
         await _settingsRepository.SetAsync("MusicVolume", MusicVolume.ToString(CultureInfo.InvariantCulture)).ConfigureAwait(true);
 

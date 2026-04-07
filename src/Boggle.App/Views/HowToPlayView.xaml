@@ -19,7 +19,15 @@
                 <StackPanel>
                     <TextBlock Style="{StaticResource H2Style}" FontSize="18" Text="Objective" Margin="0,0,0,8" />
                     <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,16"
-                               Text="Find as many words as possible on the 4×4 letter grid before time runs out. Words must be at least 3 letters long and formed by connecting adjacent letters (horizontally, vertically, or diagonally)." />
+                               Text="Find as many words as possible on the letter grid before time runs out. Words are formed by connecting adjacent letters (horizontally, vertically, or diagonally)." />
+
+                    <TextBlock Style="{StaticResource H2Style}" FontSize="18" Text="Game Modes" Margin="0,0,0,8" />
+                    <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,4"
+                               Text="• Standard — 4×4 grid, minimum 3-letter words, 3-minute timer" />
+                    <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,4"
+                               Text="• Big Boggle — 5×5 grid, minimum 4-letter words, 3-minute timer" />
+                    <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,16"
+                               Text="• Super Big Boggle — 6×6 grid, minimum 4-letter words, 4-minute timer. Includes two-letter combo dice and blocked positions." />
 
                     <TextBlock Style="{StaticResource H2Style}" FontSize="18" Text="Rules" Margin="0,0,0,8" />
                     <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,4"
@@ -27,13 +35,13 @@
                     <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,4"
                                Text="• Letters must be adjacent (including diagonals)" />
                     <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,4"
-                               Text="• Words must be in the NWL2020 dictionary" />
+                               Text="• Words must be in the dictionary" />
                     <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,4"
                                Text="• 'Qu' counts as a single tile" />
                     <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,16"
                                Text="• No proper nouns, abbreviations, or hyphenated words" />
 
-                    <TextBlock Style="{StaticResource H2Style}" FontSize="18" Text="Scoring" Margin="0,0,0,8" />
+                    <TextBlock Style="{StaticResource H2Style}" FontSize="18" Text="Scoring — Standard &amp; Big Boggle" Margin="0,0,0,8" />
                     <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,4"
                                Text="• 3–4 letters: 1 point" />
                     <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,4"
@@ -45,11 +53,27 @@
                     <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,16"
                                Text="• 8+ letters: 11 points" />
 
+                    <TextBlock Style="{StaticResource H2Style}" FontSize="18" Text="Scoring — Super Big Boggle" Margin="0,0,0,8" />
+                    <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,4"
+                               Text="• 4 letters: 1 point" />
+                    <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,4"
+                               Text="• 5 letters: 2 points" />
+                    <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,4"
+                               Text="• 6 letters: 3 points" />
+                    <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,4"
+                               Text="• 7 letters: 5 points" />
+                    <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,4"
+                               Text="• 8 letters: 11 points" />
+                    <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,16"
+                               Text="• 9+ letters: 2 points per letter" />
+
                     <TextBlock Style="{StaticResource H2Style}" FontSize="18" Text="Tips" Margin="0,0,0,8" />
                     <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,4"
                                Text="• Look for common prefixes and suffixes (UN-, RE-, -ING, -ED)" />
                     <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,4"
                                Text="• Longer words score exponentially more points" />
+                    <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap" Margin="0,0,0,4"
+                               Text="• Bigger boards have more possible words — explore diagonals!" />
                     <TextBlock Style="{StaticResource BodyStyle}" TextWrapping="Wrap"
                                Text="• Try to find all possible words — check the results screen to see what you missed!" />
                 </StackPanel>

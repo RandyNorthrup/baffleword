@@ -98,6 +98,12 @@ public sealed class AchievementService : IAchievementService
             18 => HasConsecutiveValidStreak(round, 5),                               // Streak Master
             19 => round.InvalidSubmissionCount == 0 && round.ValidWordCount > 0,     // No Mistakes
             20 => CountQuWords(round) >= 3,                                          // Qu Master
+            21 => round.Mode == GameMode.BigBoggle && stats.TotalRoundsPlayed >= 1,  // Big Thinker
+            22 => round.Mode == GameMode.SuperBigBoggle && stats.TotalRoundsPlayed >= 1, // Super Solver
+            23 => round.Mode == GameMode.BigBoggle && round.Score >= 150,            // Big Score
+            24 => round.Mode == GameMode.SuperBigBoggle && round.Score >= 150,       // Super Score
+            25 => round.Mode == GameMode.BigBoggle && round.ValidWordCount >= 25,    // Big Word Finder
+            26 => round.Mode == GameMode.SuperBigBoggle && round.ValidWordCount >= 25, // Super Word Finder
             _ => false,
         };
     }
@@ -161,6 +167,12 @@ public sealed class AchievementService : IAchievementService
             new() { Id = 18, Name = "Streak Master", Description = "Find 5 valid words in a row" },
             new() { Id = 19, Name = "No Mistakes", Description = "Complete a round with no invalid submissions" },
             new() { Id = 20, Name = "Qu Master", Description = "Find 3 words containing \"Qu\" in one round" },
+            new() { Id = 21, Name = "Big Thinker", Description = "Complete a Big Boggle round" },
+            new() { Id = 22, Name = "Super Solver", Description = "Complete a Super Big Boggle round" },
+            new() { Id = 23, Name = "Big Score", Description = "Score 150+ points in a Big Boggle round" },
+            new() { Id = 24, Name = "Super Score", Description = "Score 150+ points in a Super Big Boggle round" },
+            new() { Id = 25, Name = "Big Word Finder", Description = "Find 25 words in a Big Boggle round" },
+            new() { Id = 26, Name = "Super Word Finder", Description = "Find 25 words in a Super Big Boggle round" },
         ];
     }
 }

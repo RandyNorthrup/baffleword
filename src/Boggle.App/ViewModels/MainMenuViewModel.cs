@@ -6,6 +6,8 @@ namespace Boggle.App.ViewModels;
 
 using System.Windows.Input;
 using Boggle.App.Navigation;
+using Boggle.Core.Models;
+using Boggle.Core.Repositories;
 
 /// <summary>
 /// ViewModel for the main menu view.
@@ -13,16 +15,21 @@ using Boggle.App.Navigation;
 public sealed class MainMenuViewModel : ViewModelBase
 {
     private readonly INavigationService _navigation;
+    private readonly ISettingsRepository _settingsRepository;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainMenuViewModel"/> class.
     /// </summary>
     /// <param name="navigation">The navigation service.</param>
-    public MainMenuViewModel(INavigationService navigation)
+    /// <param name="settingsRepository">The settings repository.</param>
+    public MainMenuViewModel(INavigationService navigation, ISettingsRepository settingsRepository)
     {
         _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
+        _settingsRepository = settingsRepository ?? throw new ArgumentNullException(nameof(settingsRepository));
 
-        NewGameCommand = new RelayCommand(OnNewGame);
+        PlayStandardCommand = new RelayCommand(() => _ = LaunchGameAsync(GameMode.Standard));
+        PlayBigBoggleCommand = new RelayCommand(() => _ = LaunchGameAsync(GameMode.BigBoggle));
+        PlaySuperBigBoggleCommand = new RelayCommand(() => _ = LaunchGameAsync(GameMode.SuperBigBoggle));
         HighScoresCommand = new RelayCommand(OnHighScores);
         AchievementsCommand = new RelayCommand(OnAchievements);
         HowToPlayCommand = new RelayCommand(OnHowToPlay);
@@ -30,9 +37,19 @@ public sealed class MainMenuViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets the command to start a new game.
+    /// Gets the command to play Standard Boggle.
     /// </summary>
-    public ICommand NewGameCommand { get; }
+    public ICommand PlayStandardCommand { get; }
+
+    /// <summary>
+    /// Gets the command to play Big Boggle.
+    /// </summary>
+    public ICommand PlayBigBoggleCommand { get; }
+
+    /// <summary>
+    /// Gets the command to play Super Big Boggle.
+    /// </summary>
+    public ICommand PlaySuperBigBoggleCommand { get; }
 
     /// <summary>
     /// Gets the command to view high scores.
@@ -54,8 +71,9 @@ public sealed class MainMenuViewModel : ViewModelBase
     /// </summary>
     public ICommand SettingsCommand { get; }
 
-    private void OnNewGame()
+    private async Task LaunchGameAsync(GameMode mode)
     {
+        await _settingsRepository.SetAsync("GameMode", mode.ToString()).ConfigureAwait(true);
         _navigation.NavigateTo<GameViewModel>();
     }
 
