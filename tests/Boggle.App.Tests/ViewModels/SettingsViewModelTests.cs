@@ -54,41 +54,30 @@ public sealed class SettingsViewModelTests
         var sut = CreateSut();
 
         sut.TimerDurationSeconds.Should().Be(180);
-        sut.MinWordLength.Should().Be(3);
+        sut.IsTimer3Min.Should().BeTrue();
         sut.SfxVolume.Should().Be(0.8);
         sut.MusicVolume.Should().Be(0.5);
     }
 
     [Fact]
-    public void TimerDurationSeconds_ClampsTooLow()
+    public void TimerPresets_SetCorrectDuration()
     {
         var sut = CreateSut();
-        sut.TimerDurationSeconds = 10;
+
+        sut.IsTimer1Min = true;
         sut.TimerDurationSeconds.Should().Be(60);
-    }
+        sut.IsTimer1Min.Should().BeTrue();
+        sut.IsTimer3Min.Should().BeFalse();
+        sut.IsTimer5Min.Should().BeFalse();
 
-    [Fact]
-    public void TimerDurationSeconds_ClampsTooHigh()
-    {
-        var sut = CreateSut();
-        sut.TimerDurationSeconds = 9999;
-        sut.TimerDurationSeconds.Should().Be(600);
-    }
+        sut.IsTimer5Min = true;
+        sut.TimerDurationSeconds.Should().Be(300);
+        sut.IsTimer1Min.Should().BeFalse();
+        sut.IsTimer3Min.Should().BeFalse();
+        sut.IsTimer5Min.Should().BeTrue();
 
-    [Fact]
-    public void MinWordLength_ClampsTooLow()
-    {
-        var sut = CreateSut();
-        sut.MinWordLength = 1;
-        sut.MinWordLength.Should().Be(3);
-    }
-
-    [Fact]
-    public void MinWordLength_ClampsTooHigh()
-    {
-        var sut = CreateSut();
-        sut.MinWordLength = 10;
-        sut.MinWordLength.Should().Be(5);
+        sut.IsTimer3Min = true;
+        sut.TimerDurationSeconds.Should().Be(180);
     }
 
     [Fact]
@@ -144,14 +133,12 @@ public sealed class SettingsViewModelTests
 
         var sut = CreateSut();
         sut.TimerDurationSeconds = 120;
-        sut.MinWordLength = 4;
         sut.SfxVolume = 0.6;
         sut.MusicVolume = 0.4;
 
         sut.SaveCommand.Execute(null);
 
         _settingsRepo.Verify(r => r.SetAsync("TimerDurationSeconds", "120"), Times.Once);
-        _settingsRepo.Verify(r => r.SetAsync("MinWordLength", "4"), Times.Once);
         _settingsRepo.Verify(r => r.SetAsync("SfxVolume", "0.6"), Times.Once);
         _settingsRepo.Verify(r => r.SetAsync("MusicVolume", "0.4"), Times.Once);
         _navigation.Verify(n => n.NavigateTo<MainMenuViewModel>(), Times.Once);
@@ -161,7 +148,6 @@ public sealed class SettingsViewModelTests
     public async Task LoadSettings_PopulatesFromRepository()
     {
         _settingsRepo.Setup(r => r.GetAsync("TimerDurationSeconds")).ReturnsAsync("240");
-        _settingsRepo.Setup(r => r.GetAsync("MinWordLength")).ReturnsAsync("4");
         _settingsRepo.Setup(r => r.GetAsync("SfxVolume")).ReturnsAsync("0.3");
         _settingsRepo.Setup(r => r.GetAsync("MusicVolume")).ReturnsAsync("0.9");
 
@@ -171,7 +157,6 @@ public sealed class SettingsViewModelTests
         await Task.Delay(200);
 
         sut.TimerDurationSeconds.Should().Be(240);
-        sut.MinWordLength.Should().Be(4);
         sut.SfxVolume.Should().Be(0.3);
         sut.MusicVolume.Should().Be(0.9);
     }

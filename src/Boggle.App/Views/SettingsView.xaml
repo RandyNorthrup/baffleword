@@ -16,31 +16,22 @@
         <!-- Settings Card -->
         <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="64,0" VerticalAlignment="Center">
             <StackPanel>
-                <!-- Timer Duration -->
-                <TextBlock Text="Round Timer (seconds)" Style="{StaticResource BodyStyle}" Margin="0,0,0,4" />
-                <Grid Margin="0,0,0,20">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="60" />
-                    </Grid.ColumnDefinitions>
-                    <Slider Grid.Column="0" Minimum="60" Maximum="600" TickFrequency="30" IsSnapToTickEnabled="True"
-                            Value="{Binding TimerDurationSeconds}" VerticalAlignment="Center" />
-                    <TextBlock Grid.Column="1" Text="{Binding TimerDurationSeconds}" Style="{StaticResource ScoreStyle}"
-                               FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                </Grid>
-
-                <!-- Min Word Length -->
-                <TextBlock Text="Minimum Word Length" Style="{StaticResource BodyStyle}" Margin="0,0,0,4" />
-                <Grid Margin="0,0,0,20">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="60" />
-                    </Grid.ColumnDefinitions>
-                    <Slider Grid.Column="0" Minimum="3" Maximum="5" TickFrequency="1" IsSnapToTickEnabled="True"
-                            Value="{Binding MinWordLength}" VerticalAlignment="Center" />
-                    <TextBlock Grid.Column="1" Text="{Binding MinWordLength}" Style="{StaticResource ScoreStyle}"
-                               FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                </Grid>
+                <!-- Round Timer -->
+                <TextBlock Text="Round Timer" Style="{StaticResource BodyStyle}" Margin="0,0,0,8" />
+                <UniformGrid Rows="1" Margin="0,0,0,20">
+                    <RadioButton Content="1 min" GroupName="Timer"
+                                 IsChecked="{Binding IsTimer1Min}"
+                                 Style="{StaticResource TimerPresetStyle}"
+                                 Margin="0,0,4,0" />
+                    <RadioButton Content="3 min" GroupName="Timer"
+                                 IsChecked="{Binding IsTimer3Min}"
+                                 Style="{StaticResource TimerPresetStyle}"
+                                 Margin="4,0,4,0" />
+                    <RadioButton Content="5 min" GroupName="Timer"
+                                 IsChecked="{Binding IsTimer5Min}"
+                                 Style="{StaticResource TimerPresetStyle}"
+                                 Margin="4,0,0,0" />
+                </UniformGrid>
 
                 <!-- SFX Volume -->
                 <TextBlock Text="Sound Effects Volume" Style="{StaticResource BodyStyle}" Margin="0,0,0,4" />
