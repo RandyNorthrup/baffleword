@@ -1,0 +1,27 @@
+<Project>
+  <!-- Directory.Build.targets - applied after all project files -->
+
+  <!-- Ensure test assemblies are not subject to documentation requirements -->
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- Suppress analyzer rules that conflict with test conventions -->
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+    <!-- CA1707: Test methods use underscores for readability (e.g., Method_Scenario_Expected) -->
+    <!-- SA1600: Test methods and classes don't need XML documentation -->
+    <!-- CA1806: Assert.Throws(() => new Foo()) intentionally discards the created instance -->
+    <!-- CA2007: xUnit1030 conflicts with CA2007; test methods must not use ConfigureAwait(false) -->
+    <NoWarn>$(NoWarn);CA1707;SA1600;CA1806;CA2007</NoWarn>
+  </PropertyGroup>
+
+  <!-- Coverlet code coverage settings for test projects -->
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+    <CollectCoverage>true</CollectCoverage>
+    <CoverletOutputFormat>cobertura</CoverletOutputFormat>
+    <CoverletOutput>$(BaseOutputPath)coverage/</CoverletOutput>
+    <ExcludeByAttribute>GeneratedCodeAttribute,CompilerGeneratedAttribute,ExcludeFromCodeCoverage</ExcludeByAttribute>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,195 @@
+// <copyright file="GameView.xaml.cs" company="Boggle">
+// Copyright (c) Boggle. All rights reserved.
+// </copyright>
+
+namespace Boggle.App.Views;
+
+using System.ComponentModel;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using Boggle.App.ViewModels;
+
+/// <summary>
+/// Game view with board, timer, drag-to-select, and pause overlay.
+/// </summary>
+public partial class GameView : UserControl
+{
+    private string _previousFeedback = string.Empty;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GameView"/> class.
+    /// </summary>
+    public GameView()
+    {
+        InitializeComponent();
+        Loaded += OnLoaded;
+        DataContextChanged += OnDataContextChanged;
+    }
+
+    private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent)
+        where T : DependencyObject
+    {
+        int count = VisualTreeHelper.GetChildrenCount(parent);
+        for (int i = 0; i < count; i++)
+        {
+            DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+            if (child is T match)
+            {
+                yield return match;
+            }
+
+            foreach (T grandchild in FindVisualChildren<T>(child))
+            {
+                yield return grandchild;
+            }
+        }
+    }
+
+    private static TileViewModel? GetTileFromElement(DependencyObject? element)
+    {
+        while (element != null)
+        {
+            if (element is FrameworkElement fe && fe.DataContext is TileViewModel tile)
+            {
+                return tile;
+            }
+
+            element = VisualTreeHelper.GetParent(element);
+        }
+
+        return null;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        AnimateBoardEntrance();
+    }
+
+    private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (e.OldValue is INotifyPropertyChanged oldVm)
+        {
+            oldVm.PropertyChanged -= OnViewModelPropertyChanged;
+        }
+
+        if (e.NewValue is INotifyPropertyChanged newVm)
+        {
+            newVm.PropertyChanged += OnViewModelPropertyChanged;
+        }
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(GameViewModel.LastSubmissionFeedback))
+        {
+            string newFeedback = FeedbackText.Text;
+            if (!string.IsNullOrEmpty(newFeedback) && newFeedback != _previousFeedback)
+            {
+                _previousFeedback = newFeedback;
+                AnimateFeedbackPulse();
+            }
+        }
+    }
+
+    private void BoardGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is not GameViewModel vm)
+        {
+            return;
+        }
+
+        TileViewModel? tile = GetTileFromElement(e.OriginalSource as DependencyObject);
+        if (tile != null)
+        {
+            vm.BeginDragSelection(tile);
+            BoardGrid.CaptureMouse();
+            e.Handled = true;
+        }
+    }
+
+    private void BoardGrid_PreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        if (DataContext is not GameViewModel vm || !vm.IsDragging)
+        {
+            return;
+        }
+
+        if (e.LeftButton != MouseButtonState.Pressed)
+        {
+            vm.EndDragSelection();
+            BoardGrid.ReleaseMouseCapture();
+            return;
+        }
+
+        Point pos = e.GetPosition(BoardGrid);
+        HitTestResult? hit = VisualTreeHelper.HitTest(BoardGrid, pos);
+        if (hit?.VisualHit is DependencyObject hitElement)
+        {
+            TileViewModel? tile = GetTileFromElement(hitElement);
+            if (tile != null)
+            {
+                vm.ExtendDragSelection(tile);
+            }
+        }
+    }
+
+    private void BoardGrid_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is not GameViewModel vm)
+        {
+            return;
+        }
+
+        vm.EndDragSelection();
+        BoardGrid.ReleaseMouseCapture();
+        e.Handled = true;
+    }
+
+    private void AnimateBoardEntrance()
+    {
+        int delay = 0;
+        foreach (Border tile in FindVisualChildren<Border>(BoardGrid).Where(t => Math.Abs(t.Width - 72) < 0.1))
+        {
+            tile.RenderTransformOrigin = new Point(0.5, 0.5);
+            tile.RenderTransform = new ScaleTransform(0, 0);
+            tile.Opacity = 0;
+
+            var scaleX = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(250))
+            {
+                BeginTime = TimeSpan.FromMilliseconds(delay),
+                EasingFunction = new BackEase { Amplitude = 0.3, EasingMode = EasingMode.EaseOut },
+            };
+
+            var scaleY = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(250))
+            {
+                BeginTime = TimeSpan.FromMilliseconds(delay),
+                EasingFunction = new BackEase { Amplitude = 0.3, EasingMode = EasingMode.EaseOut },
+            };
+
+            var fade = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(200))
+            {
+                BeginTime = TimeSpan.FromMilliseconds(delay),
+            };
+
+            tile.RenderTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleX);
+            tile.RenderTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleY);
+            tile.BeginAnimation(OpacityProperty, fade);
+
+            delay += 40;
+        }
+    }
+
+    private void AnimateFeedbackPulse()
+    {
+        var scaleUp = new DoubleAnimation(1.0, 1.2, TimeSpan.FromMilliseconds(100))
+        {
+            AutoReverse = true,
+        };
+
+        FeedbackText.RenderTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleUp);
+        FeedbackText.RenderTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleUp.Clone());
+    }
+}

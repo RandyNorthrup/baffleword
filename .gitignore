@@ -1,0 +1,56 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+# NuGet
+*.nupkg
+*.snupkg
+**/packages/
+.nuget/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Visual Studio
+.vs/
+*.code-workspace
+
+# Rider
+.idea/
+
+# dotnet tool
+.dotnet/
+
+# Test results
+TestResults/
+*.trx
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# SQLite databases (runtime created)
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
+logs/

@@ -1,0 +1,65 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Scaffold Boggle Solution",
+			"type": "shell",
+			"command": "powershell -ExecutionPolicy Bypass -File tools/scaffold.ps1",
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
+		},
+		{
+			"label": "dotnet-version-check",
+			"type": "shell",
+			"command": "dotnet --version",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "scaffold",
+			"type": "shell",
+			"command": "powershell -ExecutionPolicy Bypass -File tools/scaffold.ps1"
+		},
+		{
+			"label": "Build Solution",
+			"type": "shell",
+			"command": "dotnet build Boggle.sln --verbosity minimal 2>&1",
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build Solution",
+			"type": "shell",
+			"command": "dotnet build Boggle.sln --verbosity minimal 2>&1",
+			"problemMatcher": [
+				"$msCompile"
+			]
+		},
+		{
+			"label": "build-check",
+			"type": "shell",
+			"command": "dotnet build Boggle.sln --verbosity minimal",
+			"problemMatcher": [
+				"$msCompile"
+			]
+		},
+		{
+			"label": "test-echo",
+			"type": "shell",
+			"command": "echo hello",
+			"problemMatcher": []
+		},
+		{
+			"label": "build-now",
+			"type": "shell",
+			"command": "dotnet build Boggle.sln --verbosity minimal",
+			"problemMatcher": [
+				"$msCompile"
+			]
+		}
+	]
+}
