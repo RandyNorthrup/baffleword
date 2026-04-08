@@ -23,6 +23,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
     private readonly IGameEngine _gameEngine;
     private readonly INavigationService _navigation;
     private readonly IAchievementService _achievementService;
+    private readonly IAchievementRepository _achievementRepository;
     private readonly IHighScoreService _highScoreService;
     private readonly IStatisticsService _statisticsService;
     private readonly IAudioManager _audioManager;
@@ -54,6 +55,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
     /// <param name="gameEngine">The game engine.</param>
     /// <param name="navigation">The navigation service.</param>
     /// <param name="achievementService">The achievement service.</param>
+    /// <param name="achievementRepository">The achievement repository.</param>
     /// <param name="highScoreService">The high score service.</param>
     /// <param name="statisticsService">The statistics service.</param>
     /// <param name="audioManager">The audio manager.</param>
@@ -62,6 +64,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
         IGameEngine gameEngine,
         INavigationService navigation,
         IAchievementService achievementService,
+        IAchievementRepository achievementRepository,
         IHighScoreService highScoreService,
         IStatisticsService statisticsService,
         IAudioManager audioManager,
@@ -70,6 +73,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
         _gameEngine = gameEngine ?? throw new ArgumentNullException(nameof(gameEngine));
         _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
         _achievementService = achievementService ?? throw new ArgumentNullException(nameof(achievementService));
+        _achievementRepository = achievementRepository ?? throw new ArgumentNullException(nameof(achievementRepository));
         _highScoreService = highScoreService ?? throw new ArgumentNullException(nameof(highScoreService));
         _statisticsService = statisticsService ?? throw new ArgumentNullException(nameof(statisticsService));
         _audioManager = audioManager ?? throw new ArgumentNullException(nameof(audioManager));
@@ -79,6 +83,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
         PauseCommand = new RelayCommand(OnPause, () => !IsPaused);
         ResumeCommand = new RelayCommand(OnResume, () => IsPaused);
         QuitCommand = new RelayCommand(OnQuit);
+        SettingsCommand = new RelayCommand(OnSettings, () => IsPaused);
 
         _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
         _timer.Tick += OnTimerTick;
@@ -88,6 +93,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
         GroupedFoundWords.GroupDescriptions.Add(new PropertyGroupDescription(nameof(WordResult.WordLength)));
         GroupedFoundWords.SortDescriptions.Add(new SortDescription(nameof(WordResult.WordLength), ListSortDirection.Descending));
         GroupedFoundWords.SortDescriptions.Add(new SortDescription(nameof(WordResult.Word), ListSortDirection.Ascending));
+        AchievementToasts = [];
         _ = InitializeAsync();
     }
 
@@ -280,6 +286,16 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
     public ICommand QuitCommand { get; }
 
     /// <summary>
+    /// Gets the command to open settings.
+    /// </summary>
+    public ICommand SettingsCommand { get; }
+
+    /// <summary>
+    /// Gets the collection of achievement toast notifications.
+    /// </summary>
+    public ObservableCollection<Achievement> AchievementToasts { get; }
+
+    /// <summary>
     /// Begins a drag selection starting from the given tile.
     /// </summary>
     /// <param name="tile">The tile where the drag started.</param>
@@ -438,6 +454,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
         _selectedPath.Add(tile);
         tile.IsSelected = true;
         tile.SelectionOrder = _selectedPath.Count;
+        _audioManager.SoundEffects.Play(Audio.SoundEffect.TileShuffle);
         UpdateCurrentWordFromPath();
     }
 
@@ -553,15 +570,28 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
             await _highScoreService.TryRecordScoreAsync(completedRound).ConfigureAwait(true);
             await _statisticsService.UpdateStatisticsAsync(completedRound).ConfigureAwait(true);
 
+            foreach (Achievement achievement in unlocked)
+            {
+                await _achievementRepository.SaveAsync(achievement).ConfigureAwait(true);
+            }
+
             if (unlocked.Count > 0)
             {
                 _audioManager.SoundEffects.Play(SoundEffect.AchievementUnlock);
+                foreach (Achievement achievement in unlocked)
+                {
+                    AchievementToasts.Add(achievement);
+                }
+
+                // Brief delay so toasts are visible before navigating
+                await Task.Delay(2000 + (unlocked.Count * 500)).ConfigureAwait(true);
+                AchievementToasts.Clear();
             }
 
             _navigation.NavigateTo<RoundResultsViewModel>();
             if (_navigation.CurrentViewModel is RoundResultsViewModel resultsVm)
             {
-                resultsVm.LoadResults(completedRound, unlocked);
+                resultsVm.LoadResults(completedRound);
             }
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
@@ -583,5 +613,10 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
         }
 
         _navigation.NavigateTo<MainMenuViewModel>();
+    }
+
+    private void OnSettings()
+    {
+        _navigation.NavigateToPreservingCurrent<SettingsViewModel>();
     }
 }

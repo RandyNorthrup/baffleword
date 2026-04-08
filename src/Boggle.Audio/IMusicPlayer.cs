@@ -10,6 +10,11 @@ namespace Boggle.Audio;
 public interface IMusicPlayer : IDisposable
 {
     /// <summary>
+    /// Gets or sets a value indicating whether music is muted.
+    /// </summary>
+    bool IsMuted { get; set; }
+
+    /// <summary>
     /// Gets or sets the music volume (0.0 to 1.0).
     /// </summary>
     float Volume { get; set; }

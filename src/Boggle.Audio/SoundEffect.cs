@@ -47,4 +47,7 @@ public enum SoundEffect
 
     /// <summary>Soft whoosh up on resume.</summary>
     Resume,
+
+    /// <summary>Subtle shuffle sound when dragging over tiles.</summary>
+    TileShuffle,
 }

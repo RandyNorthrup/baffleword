@@ -10,10 +10,10 @@ A polished WPF desktop Boggle game built with .NET 9, featuring three game modes
 - **Board solver** — Finds all possible words on any board via DFS traversal
 - **High scores** — Persistent SQLite leaderboard with top 50 scores per game mode
 - **26 achievements** — Unlock milestones across all three game modes
-- **Audio system** — 13 sound effects + ambient music loop via NAudio
+- **Audio system** — 14 sound effects + ambient music loop via NAudio
 - **Animations** — Board roll-in, timer pulse, word feedback, view transitions, button micro-interactions
 - **Pause/resume** — Pause mid-round without losing progress
-- **Settings** — Adjustable SFX and music volume
+- **Settings** — Adjustable SFX and music volume with mute toggle
 
 ## Game Modes
 
@@ -71,9 +71,9 @@ dotnet run --project src/Boggle.App
 dotnet test
 ```
 
-312 tests across 4 test projects:
+324 tests across 4 test projects:
 - **Boggle.Core.Tests** (207) — Game engine, board generation, scoring, dictionary, achievements, statistics
-- **Boggle.App.Tests** (80) — ViewModels, navigation, converters, commands
+- **Boggle.App.Tests** (92) — ViewModels, navigation, converters, commands
 - **Boggle.Data.Tests** (20) — SQLite repositories, settings persistence
 - **Boggle.Audio.Tests** (5) — Audio manager interface tests
 

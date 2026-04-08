@@ -14,6 +14,7 @@
     <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900Color}" />
     <SolidColorBrush x:Key="SuccessGreenBrush" Color="{StaticResource SuccessGreenColor}" />
     <SolidColorBrush x:Key="ErrorRedBrush" Color="{StaticResource ErrorRedColor}" />
+    <SolidColorBrush x:Key="LightRedBrush" Color="{StaticResource LightRedColor}" />
     <SolidColorBrush x:Key="WarningAmberBrush" Color="{StaticResource WarningAmberColor}" />
     <SolidColorBrush x:Key="GoldBrush" Color="{StaticResource GoldColor}" />
 

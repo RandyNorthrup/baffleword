@@ -18,6 +18,8 @@ public sealed class MusicPlayer : IMusicPlayer
     private bool _loop;
     private string? _currentFilePath;
     private bool _disposed;
+    private float _volume = 0.5f;
+    private bool _isMuted;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MusicPlayer"/> class.
@@ -29,14 +31,42 @@ public sealed class MusicPlayer : IMusicPlayer
     }
 
     /// <inheritdoc/>
-    public float Volume
+    public bool IsMuted
     {
-        get => _waveOut?.Volume ?? 0.5f;
+        get => _isMuted;
         set
         {
+            if (_isMuted == value)
+            {
+                return;
+            }
+
+            _isMuted = value;
+            if (_isMuted)
+            {
+                PausePlayback();
+            }
+            else if (_waveOut?.PlaybackState == PlaybackState.Paused)
+            {
+                ResumePlayback();
+            }
+            else if (_waveOut?.PlaybackState == PlaybackState.Stopped)
+            {
+                _waveOut.Play();
+            }
+        }
+    }
+
+    /// <inheritdoc/>
+    public float Volume
+    {
+        get => _volume;
+        set
+        {
+            _volume = Math.Clamp(value, 0f, 1f);
             if (_waveOut is not null)
             {
-                _waveOut.Volume = Math.Clamp(value, 0f, 1f);
+                _waveOut.Volume = _volume;
             }
         }
     }
@@ -69,10 +99,15 @@ public sealed class MusicPlayer : IMusicPlayer
             _audioReader = new AudioFileReader(filePath);
             _waveOut = new WaveOutEvent();
             _waveOut.Init(_audioReader);
+            _waveOut.Volume = _volume;
 
             _waveOut.PlaybackStopped += OnPlaybackStopped;
 
-            _waveOut.Play();
+            if (!_isMuted)
+            {
+                _waveOut.Play();
+            }
+
             _logger.LogInformation("Music started: {FilePath}", filePath);
         }
         catch (InvalidOperationException ex)

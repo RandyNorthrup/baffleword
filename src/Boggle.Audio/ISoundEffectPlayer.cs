@@ -10,6 +10,11 @@ namespace Boggle.Audio;
 public interface ISoundEffectPlayer : IDisposable
 {
     /// <summary>
+    /// Gets or sets a value indicating whether sound effects are muted.
+    /// </summary>
+    bool IsMuted { get; set; }
+
+    /// <summary>
     /// Gets or sets the master volume for sound effects (0.0 to 1.0).
     /// </summary>
     float Volume { get; set; }

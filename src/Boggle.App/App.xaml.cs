@@ -23,6 +23,11 @@ public partial class App : Application
 {
     private ServiceProvider? _serviceProvider;
 
+    /// <summary>
+    /// Gets the DI service provider.
+    /// </summary>
+    public IServiceProvider? Services => _serviceProvider;
+
     /// <inheritdoc/>
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -53,8 +58,33 @@ public partial class App : Application
         IBoggleDatabase database = _serviceProvider.GetRequiredService<IBoggleDatabase>();
         await database.InitializeAsync().ConfigureAwait(true);
 
-        // Initialize audio system
+        // Load saved volume settings and initialize audio system
         IAudioManager audioManager = _serviceProvider.GetRequiredService<IAudioManager>();
+        ISettingsRepository settingsRepo = _serviceProvider.GetRequiredService<ISettingsRepository>();
+        string? sfxSetting = await settingsRepo.GetAsync("SfxVolume").ConfigureAwait(true);
+        if (sfxSetting != null && double.TryParse(sfxSetting, System.Globalization.CultureInfo.InvariantCulture, out double sfxVol))
+        {
+            audioManager.SoundEffects.Volume = (float)sfxVol;
+        }
+
+        string? musicSetting = await settingsRepo.GetAsync("MusicVolume").ConfigureAwait(true);
+        if (musicSetting != null && double.TryParse(musicSetting, System.Globalization.CultureInfo.InvariantCulture, out double musicVol))
+        {
+            audioManager.Music.Volume = (float)musicVol;
+        }
+
+        string? sfxMuted = await settingsRepo.GetAsync("SfxMuted").ConfigureAwait(true);
+        if (sfxMuted != null && bool.TryParse(sfxMuted, out bool sfxMute) && sfxMute)
+        {
+            audioManager.SoundEffects.IsMuted = true;
+        }
+
+        string? musicMuted = await settingsRepo.GetAsync("MusicMuted").ConfigureAwait(true);
+        if (musicMuted != null && bool.TryParse(musicMuted, out bool musicMute) && musicMute)
+        {
+            audioManager.Music.IsMuted = true;
+        }
+
         string soundsDir = Path.Combine(AppContext.BaseDirectory, "Assets", "Sounds");
         string musicDir = Path.Combine(AppContext.BaseDirectory, "Assets", "Music");
         audioManager.Initialize(soundsDir, musicDir);
@@ -64,6 +94,12 @@ public partial class App : Application
         using Stream wordStream = GetType().Assembly.GetManifestResourceStream("Boggle.App.Assets.WordLists.english.txt")!;
         WordListLoader loader = _serviceProvider.GetRequiredService<WordListLoader>();
         trie.LoadWords(loader.LoadFromStream(wordStream));
+
+        // Load saved achievement states
+        IAchievementRepository achievementRepo = _serviceProvider.GetRequiredService<IAchievementRepository>();
+        IReadOnlyList<Boggle.Core.Models.Achievement> savedAchievements = await achievementRepo.GetAllAsync().ConfigureAwait(true);
+        AchievementService achievementService = (AchievementService)_serviceProvider.GetRequiredService<IAchievementService>();
+        achievementService.LoadState(savedAchievements);
 
         // Create and show main window
         MainWindow mainWindow = _serviceProvider.GetRequiredService<MainWindow>();

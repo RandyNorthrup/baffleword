@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
     <RootNamespace>Boggle.App</RootNamespace>
-    <AssemblyName>Boggle.App</AssemblyName>
+    <AssemblyName>Boggle</AssemblyName>
     <ApplicationIcon>Assets\Icons\app_icon.ico</ApplicationIcon>
     <!-- CA1515: WPF XAML requires public types for converters, ViewModels, and views -->
     <NoWarn>$(NoWarn);CA1515</NoWarn>

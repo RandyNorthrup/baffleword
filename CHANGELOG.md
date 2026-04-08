@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.5.1] — 2026-04-08
+
+### Fixed
+- **Music mute persistence**: Muting music now pauses playback instead of zeroing volume, so the mute state persists correctly when navigating between views (main menu → game, pause menu → settings → back)
+- **Round results display**: Only valid/scored words are shown in the "Your Words" list on the round results screen; invalid, duplicate, and rejected submissions are no longer displayed
+
+### Added
+- **Tile drag shuffle sound**: New soft wooden clack sound (`tile_shuffle.wav`) plays each time a tile is added during drag selection
+- **Button hover/click sounds**: All primary and secondary buttons now play `ButtonHover` on mouse enter and `ButtonClick` on press via an attached behavior
+- **TileShuffle sound effect**: New `TileShuffle` enum value and WAV file added to the audio system
+
+### Changed
+- **App executable renamed**: Assembly output changed from `Boggle.App.exe` to `Boggle.exe` for a cleaner user-facing name
+- **Version**: Bumped to 1.5.1 via `VersionPrefix` in Directory.Build.props
+- **Test count**: 324 tests (207 Core, 92 App, 20 Data, 5 Audio), all passing
+
+---
+
 ## [Unreleased]
 
 ### Fixed — Audit Verification

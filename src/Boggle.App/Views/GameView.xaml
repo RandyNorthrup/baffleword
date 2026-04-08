@@ -145,29 +145,54 @@
                                                 <Setter Property="BorderBrush" Value="{StaticResource PrimaryBlueBrush}" />
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding IsBlocked}" Value="True">
-                                                <Setter Property="Background" Value="{StaticResource Gray300Brush}" />
-                                                <Setter Property="BorderBrush" Value="{StaticResource Gray500Brush}" />
+                                                <Setter Property="Background" Value="{StaticResource LightRedBrush}" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource ErrorRedBrush}" />
                                                 <Setter Property="Cursor" Value="Arrow" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
-                                <TextBlock Text="{Binding Letter}"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                           FontFamily="{StaticResource DefaultFont}"
-                                           FontSize="{Binding DataContext.TileFontSize, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                           FontWeight="Bold">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{StaticResource Gray700Brush}" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                    <Setter Property="Foreground" Value="White" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                                <Grid>
+                                    <TextBlock Text="{Binding Letter}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               FontFamily="{StaticResource DefaultFont}"
+                                               FontSize="{Binding DataContext.TileFontSize, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                               FontWeight="Bold">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{StaticResource Gray700Brush}" />
+                                                <Setter Property="Visibility" Value="Visible" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                        <Setter Property="Foreground" Value="White" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsBlocked}" Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <!-- icons8 Fluent "Unavailable" prohibitory icon for blocked tiles -->
+                                    <Viewbox HorizontalAlignment="Center" VerticalAlignment="Center"
+                                             Width="{Binding DataContext.TileFontSize, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                             Height="{Binding DataContext.TileFontSize, RelativeSource={RelativeSource AncestorType=ItemsControl}}">
+                                        <Viewbox.Style>
+                                            <Style TargetType="Viewbox">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsBlocked}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Viewbox.Style>
+                                        <Canvas Width="48" Height="48">
+                                            <Path Fill="{StaticResource ErrorRedBrush}" Data="M24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,12.955,35.045,4,24,4z M24,38c-7.732,0-14-6.268-14-14s6.268-14,14-14s14,6.268,14,14S31.732,38,24,38z"/>
+                                            <Polygon Fill="{StaticResource ErrorRedBrush}" Points="13.371,38.871 9.129,34.629 34.629,9.129 38.871,13.371"/>
+                                        </Canvas>
+                                    </Viewbox>
+                                </Grid>
                             </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
@@ -252,13 +277,18 @@
             <Border Background="#4D000000">
                 <Border Style="{StaticResource CardStyle}"
                         HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Width="300" Padding="32">
-                    <StackPanel HorizontalAlignment="Center">
+                        Width="320" Padding="32">
+                    <StackPanel HorizontalAlignment="Stretch">
                         <TextBlock Text="Paused" Style="{StaticResource H1Style}"
                                    HorizontalAlignment="Center" Margin="0,0,0,24" />
                         <Button Content="Resume"
                                 Command="{Binding ResumeCommand}"
                                 Style="{StaticResource PrimaryButtonStyle}"
+                                Margin="0,0,0,12"
+                                HorizontalAlignment="Stretch" />
+                        <Button Content="Settings"
+                                Command="{Binding SettingsCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}"
                                 Margin="0,0,0,12"
                                 HorizontalAlignment="Stretch" />
                         <Button Content="Quit to Menu"
@@ -269,5 +299,34 @@
                 </Border>
             </Border>
         </Grid>
+
+        <!-- Achievement Toast Notifications -->
+        <ItemsControl x:Name="ToastContainer" ItemsSource="{Binding AchievementToasts}"
+                      HorizontalAlignment="Right" VerticalAlignment="Top"
+                      Margin="0,16,16,0" IsHitTestVisible="False">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="{StaticResource GoldBrush}" CornerRadius="8"
+                            Padding="12,8" Margin="0,0,0,8" Opacity="0"
+                            RenderTransformOrigin="0.5,0.5">
+                        <Border.RenderTransform>
+                            <TranslateTransform X="300" />
+                        </Border.RenderTransform>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#x1F3C6;" FontSize="20" VerticalAlignment="Center"
+                                       Margin="0,0,8,0" />
+                            <StackPanel>
+                                <TextBlock Text="{Binding Name}" FontWeight="Bold"
+                                           FontFamily="{StaticResource DefaultFont}"
+                                           Foreground="{StaticResource Gray900Brush}" />
+                                <TextBlock Text="{Binding Description}" FontSize="12"
+                                           FontFamily="{StaticResource DefaultFont}"
+                                           Foreground="{StaticResource Gray700Brush}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </Grid>
 </UserControl>

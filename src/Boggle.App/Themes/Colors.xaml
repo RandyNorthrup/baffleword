@@ -18,6 +18,7 @@
     <!-- Semantic Colors -->
     <Color x:Key="SuccessGreenColor">#4CAF82</Color>
     <Color x:Key="ErrorRedColor">#E05C5C</Color>
+    <Color x:Key="LightRedColor">#FADADD</Color>
     <Color x:Key="WarningAmberColor">#E8A735</Color>
     <Color x:Key="GoldColor">#F0C040</Color>
 

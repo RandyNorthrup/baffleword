@@ -83,6 +83,44 @@ public sealed class NavigationServiceTests
         act.Should().Throw<ArgumentNullException>();
     }
 
+    [Fact]
+    public void NavigateToPreservingCurrent_PreservesCurrentForGoBack()
+    {
+        _sut.NavigateTo<TestableViewModel>();
+        ViewModelBase? original = _sut.CurrentViewModel;
+
+        _sut.NavigateToPreservingCurrent<TestableViewModel>();
+        _sut.CurrentViewModel.Should().NotBeSameAs(original);
+
+        bool result = _sut.GoBack();
+
+        result.Should().BeTrue();
+        _sut.CurrentViewModel.Should().BeSameAs(original);
+    }
+
+    [Fact]
+    public void GoBack_WithNoPreviousVm_ReturnsFalse()
+    {
+        _sut.NavigateTo<TestableViewModel>();
+
+        bool result = _sut.GoBack();
+
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public void NavigateTo_ClearsPreviousVm()
+    {
+        _sut.NavigateTo<TestableViewModel>();
+        _sut.NavigateToPreservingCurrent<TestableViewModel>();
+
+        // Normal navigate should clear the preserved VM
+        _sut.NavigateTo<TestableViewModel>();
+        bool result = _sut.GoBack();
+
+        result.Should().BeFalse();
+    }
+
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Instantiated by DI container")]
     private sealed class TestableViewModel : ViewModelBase
     {

@@ -38,6 +38,14 @@ public sealed class AudioManager : IAudioManager
     {
         _logger.LogInformation("Initializing audio system");
         SoundEffects.Preload(soundsDirectory);
+
+        string ambientPath = Path.Combine(musicDirectory, "ambient.wav");
+        if (File.Exists(ambientPath))
+        {
+            Music.Play(ambientPath, shouldLoop: true);
+            _logger.LogInformation("Background music started");
+        }
+
         _logger.LogInformation("Audio system initialized");
     }
 

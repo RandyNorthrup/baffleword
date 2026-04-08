@@ -26,6 +26,9 @@ public sealed class SoundEffectPlayer : ISoundEffectPlayer
     }
 
     /// <inheritdoc/>
+    public bool IsMuted { get; set; }
+
+    /// <inheritdoc/>
     public float Volume { get; set; } = 0.8f;
 
     /// <inheritdoc/>
@@ -62,7 +65,7 @@ public sealed class SoundEffectPlayer : ISoundEffectPlayer
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Objects are disposed in PlaybackStopped event handler.")]
     public void Play(SoundEffect effect)
     {
-        if (_disposed)
+        if (_disposed || IsMuted)
         {
             return;
         }
@@ -137,6 +140,7 @@ public sealed class SoundEffectPlayer : ISoundEffectPlayer
             SoundEffect.HighScore => "high_score.wav",
             SoundEffect.Pause => "pause.wav",
             SoundEffect.Resume => "resume.wav",
+            SoundEffect.TileShuffle => "tile_shuffle.wav",
             _ => throw new ArgumentOutOfRangeException(nameof(effect), effect, "Unknown sound effect"),
         };
     }

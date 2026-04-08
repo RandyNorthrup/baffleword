@@ -4,6 +4,7 @@
 
 namespace Boggle.App.Views;
 
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -106,9 +107,19 @@ public partial class GameView : UserControl
             oldVm.PropertyChanged -= OnViewModelPropertyChanged;
         }
 
+        if (e.OldValue is GameViewModel oldGameVm)
+        {
+            oldGameVm.AchievementToasts.CollectionChanged -= OnToastsChanged;
+        }
+
         if (e.NewValue is INotifyPropertyChanged newVm)
         {
             newVm.PropertyChanged += OnViewModelPropertyChanged;
+        }
+
+        if (e.NewValue is GameViewModel newGameVm)
+        {
+            newGameVm.AchievementToasts.CollectionChanged += OnToastsChanged;
         }
     }
 
@@ -278,5 +289,44 @@ public partial class GameView : UserControl
 
         FeedbackText.RenderTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleUp);
         FeedbackText.RenderTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleUp.Clone());
+    }
+
+    private void OnToastsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.Action != NotifyCollectionChangedAction.Add)
+        {
+            return;
+        }
+
+        // Wait for the ItemsControl to render the new items, then animate them
+        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, AnimateToasts);
+    }
+
+    private void AnimateToasts()
+    {
+        int delay = 0;
+        foreach (Border toast in FindVisualChildren<Border>(ToastContainer).Where(b => b.RenderTransform is TranslateTransform))
+        {
+            if (toast.Opacity > 0)
+            {
+                continue;
+            }
+
+            var slideIn = new DoubleAnimation(300, 0, TimeSpan.FromMilliseconds(400))
+            {
+                BeginTime = TimeSpan.FromMilliseconds(delay),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut },
+            };
+
+            var fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(300))
+            {
+                BeginTime = TimeSpan.FromMilliseconds(delay),
+            };
+
+            toast.BeginAnimation(OpacityProperty, fadeIn);
+            toast.RenderTransform.BeginAnimation(TranslateTransform.XProperty, slideIn);
+
+            delay += 300;
+        }
     }
 }

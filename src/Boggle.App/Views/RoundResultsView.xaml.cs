@@ -45,7 +45,6 @@ public partial class RoundResultsView : UserControl
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         AnimateScoreCard();
-        AnimateAchievements();
     }
 
     private void AnimateScoreCard()
@@ -68,30 +67,5 @@ public partial class RoundResultsView : UserControl
         ScoreCard.RenderTransform = transform;
         transform.BeginAnimation(ScaleTransform.ScaleXProperty, bounceX);
         transform.BeginAnimation(ScaleTransform.ScaleYProperty, bounceY);
-    }
-
-    private void AnimateAchievements()
-    {
-        int delay = 800;
-        foreach (Border badge in FindVisualChildren<Border>(AchievementsList).Where(b => b.RenderTransform is TranslateTransform))
-        {
-            var fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(300))
-            {
-                BeginTime = TimeSpan.FromMilliseconds(delay),
-            };
-
-            var slideIn = new DoubleAnimation(-20, 0, TimeSpan.FromMilliseconds(300))
-            {
-                BeginTime = TimeSpan.FromMilliseconds(delay),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut },
-            };
-
-            var transform = new TranslateTransform(-20, 0);
-            badge.RenderTransform = transform;
-            badge.BeginAnimation(OpacityProperty, fadeIn);
-            transform.BeginAnimation(TranslateTransform.YProperty, slideIn);
-
-            delay += 200;
-        }
     }
 }

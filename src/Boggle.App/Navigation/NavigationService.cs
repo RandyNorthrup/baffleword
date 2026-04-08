@@ -15,6 +15,7 @@ public sealed class NavigationService : INavigationService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<NavigationService> _logger;
+    private ViewModelBase? _previousViewModel;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NavigationService"/> class.
@@ -44,7 +45,40 @@ public sealed class NavigationService : INavigationService
             disposable.Dispose();
         }
 
+        _previousViewModel = null;
         CurrentViewModel = _serviceProvider.GetRequiredService<TViewModel>();
         NavigationChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <inheritdoc/>
+    public void NavigateToPreservingCurrent<TViewModel>()
+        where TViewModel : ViewModelBase
+    {
+        _logger.LogDebug("Navigating to {ViewModelType} (preserving current)", typeof(TViewModel).Name);
+
+        _previousViewModel = CurrentViewModel;
+        CurrentViewModel = _serviceProvider.GetRequiredService<TViewModel>();
+        NavigationChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <inheritdoc/>
+    public bool GoBack()
+    {
+        if (_previousViewModel == null)
+        {
+            return false;
+        }
+
+        _logger.LogDebug("Navigating back to {ViewModelType}", _previousViewModel.GetType().Name);
+
+        if (CurrentViewModel is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+
+        CurrentViewModel = _previousViewModel;
+        _previousViewModel = null;
+        NavigationChanged?.Invoke(this, EventArgs.Empty);
+        return true;
     }
 }

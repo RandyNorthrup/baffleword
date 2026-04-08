@@ -59,33 +59,6 @@
                     </Grid>
                 </Border>
 
-                <!-- Unlocked Achievements -->
-                <ItemsControl x:Name="AchievementsList" ItemsSource="{Binding UnlockedAchievements}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Background="{StaticResource GoldBrush}" CornerRadius="8"
-                                    Padding="12,8" Margin="0,0,0,8"
-                                    RenderTransformOrigin="0.5,0.5" Opacity="0">
-                                <Border.RenderTransform>
-                                    <TranslateTransform Y="-20" />
-                                </Border.RenderTransform>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="🏆" FontSize="20" VerticalAlignment="Center"
-                                               Margin="0,0,8,0" />
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Name}" FontWeight="Bold"
-                                                   FontFamily="{StaticResource DefaultFont}"
-                                                   Foreground="{StaticResource Gray900Brush}" />
-                                        <TextBlock Text="{Binding Description}" FontSize="12"
-                                                   FontFamily="{StaticResource DefaultFont}"
-                                                   Foreground="{StaticResource Gray700Brush}" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
                 <!-- Your Words -->
                 <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
                     <StackPanel>

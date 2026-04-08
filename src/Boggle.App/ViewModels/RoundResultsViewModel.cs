@@ -125,7 +125,7 @@ public sealed class RoundResultsViewModel : ViewModelBase
             : string.Empty;
 
         FoundWords.Clear();
-        foreach (WordResult word in round.SubmittedWords)
+        foreach (WordResult word in validWords)
         {
             FoundWords.Add(word);
         }

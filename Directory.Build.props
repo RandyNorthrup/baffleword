@@ -1,5 +1,6 @@
 <Project>
   <PropertyGroup>
+    <VersionPrefix>1.5.1</VersionPrefix>
     <TargetFramework>net9.0-windows</TargetFramework>
     <LangVersion>13</LangVersion>
     <Nullable>enable</Nullable>

@@ -49,18 +49,21 @@ public sealed class SettingsViewModelTests
     }
 
     [Fact]
-    public void DefaultValues_AreCorrect()
+    public void DefaultValues_ReadFromAudioManager()
     {
-        var sut = CreateSut();
+        _sfxPlayer.Setup(p => p.Volume).Returns(0.6f);
+        _musicPlayer.Setup(p => p.Volume).Returns(0.4f);
 
-        sut.SfxVolume.Should().Be(0.8);
-        sut.MusicVolume.Should().Be(0.5);
+        using var sut = CreateSut();
+
+        sut.SfxVolume.Should().BeApproximately(0.6, 0.01);
+        sut.MusicVolume.Should().BeApproximately(0.4, 0.01);
     }
 
     [Fact]
     public void SfxVolume_ClampsToRange()
     {
-        var sut = CreateSut();
+        using var sut = CreateSut();
         sut.SfxVolume = -0.5;
         sut.SfxVolume.Should().Be(0.0);
 
@@ -71,7 +74,7 @@ public sealed class SettingsViewModelTests
     [Fact]
     public void MusicVolume_ClampsToRange()
     {
-        var sut = CreateSut();
+        using var sut = CreateSut();
         sut.MusicVolume = -0.5;
         sut.MusicVolume.Should().Be(0.0);
 
@@ -82,7 +85,7 @@ public sealed class SettingsViewModelTests
     [Fact]
     public void SfxVolume_UpdatesAudioManagerLive()
     {
-        var sut = CreateSut();
+        using var sut = CreateSut();
         sut.SfxVolume = 0.3;
         _sfxPlayer.VerifySet(p => p.Volume = 0.3f, Times.Once());
     }
@@ -90,33 +93,50 @@ public sealed class SettingsViewModelTests
     [Fact]
     public void MusicVolume_UpdatesAudioManagerLive()
     {
-        var sut = CreateSut();
+        using var sut = CreateSut();
         sut.MusicVolume = 0.7;
         _musicPlayer.VerifySet(p => p.Volume = 0.7f, Times.Once());
     }
 
     [Fact]
-    public void BackCommand_NavigatesToMainMenu()
+    public void BackCommand_UsesGoBackFirst()
     {
-        var sut = CreateSut();
+        _navigation.Setup(n => n.GoBack()).Returns(true);
+        using var sut = CreateSut();
+        sut.BackCommand.Execute(null);
+        _navigation.Verify(n => n.GoBack(), Times.Once);
+        _navigation.Verify(n => n.NavigateTo<MainMenuViewModel>(), Times.Never);
+    }
+
+    [Fact]
+    public void BackCommand_FallsBackToMainMenu()
+    {
+        _navigation.Setup(n => n.GoBack()).Returns(false);
+        using var sut = CreateSut();
         sut.BackCommand.Execute(null);
         _navigation.Verify(n => n.NavigateTo<MainMenuViewModel>(), Times.Once);
     }
 
     [Fact]
-    public void SaveCommand_PersistsSettingsAndNavigates()
+    public void SfxVolume_AutoSavesToRepository()
     {
         _settingsRepo.Setup(r => r.SetAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
 
-        var sut = CreateSut();
+        using var sut = CreateSut();
         sut.SfxVolume = 0.6;
-        sut.MusicVolume = 0.4;
-
-        sut.SaveCommand.Execute(null);
 
         _settingsRepo.Verify(r => r.SetAsync("SfxVolume", "0.6"), Times.Once);
+    }
+
+    [Fact]
+    public void MusicVolume_AutoSavesToRepository()
+    {
+        _settingsRepo.Setup(r => r.SetAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+
+        using var sut = CreateSut();
+        sut.MusicVolume = 0.4;
+
         _settingsRepo.Verify(r => r.SetAsync("MusicVolume", "0.4"), Times.Once);
-        _navigation.Verify(n => n.NavigateTo<MainMenuViewModel>(), Times.Once);
     }
 
     [Fact]
@@ -125,13 +145,102 @@ public sealed class SettingsViewModelTests
         _settingsRepo.Setup(r => r.GetAsync("SfxVolume")).ReturnsAsync("0.3");
         _settingsRepo.Setup(r => r.GetAsync("MusicVolume")).ReturnsAsync("0.9");
 
-        var sut = CreateSut();
+        using var sut = CreateSut();
 
         // Allow the constructor's async load to complete
         await Task.Delay(200);
 
         sut.SfxVolume.Should().Be(0.3);
         sut.MusicVolume.Should().Be(0.9);
+    }
+
+    [Fact]
+    public async Task LoadSettings_DoesNotChangeAudioForVolume()
+    {
+        _sfxPlayer.Setup(p => p.Volume).Returns(0.8f);
+        _musicPlayer.Setup(p => p.Volume).Returns(0.5f);
+        _settingsRepo.Setup(r => r.GetAsync("SfxVolume")).ReturnsAsync("0.3");
+        _settingsRepo.Setup(r => r.GetAsync("MusicVolume")).ReturnsAsync("0.9");
+
+        _sfxPlayer.Invocations.Clear();
+        _musicPlayer.Invocations.Clear();
+
+        using var sut = CreateSut();
+        await Task.Delay(200);
+
+        _sfxPlayer.VerifySet(p => p.Volume = It.IsAny<float>(), Times.Never());
+        _musicPlayer.VerifySet(p => p.Volume = It.IsAny<float>(), Times.Never());
+    }
+
+    [Fact]
+    public void Constructor_ReadsIsMutedFromAudioPlayers()
+    {
+        _sfxPlayer.Setup(p => p.IsMuted).Returns(true);
+        _musicPlayer.Setup(p => p.IsMuted).Returns(true);
+
+        using var sut = CreateSut();
+
+        sut.IsSfxMuted.Should().BeTrue();
+        sut.IsMusicMuted.Should().BeTrue();
+    }
+
+    [Fact]
+    public void IsSfxMuted_SetsAudioPlayerDirectly()
+    {
+        _sfxPlayer.SetupProperty(p => p.IsMuted);
+        using var sut = CreateSut();
+
+        sut.IsSfxMuted = true;
+        _sfxPlayer.VerifySet(p => p.IsMuted = true);
+
+        sut.IsSfxMuted = false;
+        _sfxPlayer.VerifySet(p => p.IsMuted = false);
+    }
+
+    [Fact]
+    public void IsMusicMuted_SetsAudioPlayerDirectly()
+    {
+        _musicPlayer.SetupProperty(p => p.IsMuted);
+        using var sut = CreateSut();
+
+        sut.IsMusicMuted = true;
+        _musicPlayer.VerifySet(p => p.IsMuted = true);
+
+        sut.IsMusicMuted = false;
+        _musicPlayer.VerifySet(p => p.IsMuted = false);
+    }
+
+    [Fact]
+    public void SfxVolume_ReturnsZeroWhenMuted()
+    {
+        _sfxPlayer.Setup(p => p.Volume).Returns(0.7f);
+        _sfxPlayer.Setup(p => p.IsMuted).Returns(true);
+
+        using var sut = CreateSut();
+
+        sut.SfxVolume.Should().Be(0.0);
+    }
+
+    [Fact]
+    public void MusicVolume_ReturnsZeroWhenMuted()
+    {
+        _musicPlayer.Setup(p => p.Volume).Returns(0.5f);
+        _musicPlayer.Setup(p => p.IsMuted).Returns(true);
+
+        using var sut = CreateSut();
+
+        sut.MusicVolume.Should().Be(0.0);
+    }
+
+    [Fact]
+    public void SfxVolume_IgnoresSetWhenMuted()
+    {
+        _sfxPlayer.Setup(p => p.IsMuted).Returns(true);
+        using var sut = CreateSut();
+        _sfxPlayer.Invocations.Clear();
+
+        sut.SfxVolume = 0.9;
+        _sfxPlayer.VerifySet(p => p.Volume = It.IsAny<float>(), Times.Never());
     }
 
     private SettingsViewModel CreateSut() =>

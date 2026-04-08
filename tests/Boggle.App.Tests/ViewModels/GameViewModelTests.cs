@@ -19,6 +19,7 @@ public sealed class GameViewModelTests : IDisposable
     private readonly Mock<IGameEngine> _gameEngine = new();
     private readonly Mock<INavigationService> _navigation = new();
     private readonly Mock<IAchievementService> _achievementService = new();
+    private readonly Mock<IAchievementRepository> _achievementRepository = new();
     private readonly Mock<IHighScoreService> _highScoreService = new();
     private readonly Mock<IStatisticsService> _statisticsService = new();
     private readonly Mock<IAudioManager> _audioManager = new();
@@ -37,6 +38,7 @@ public sealed class GameViewModelTests : IDisposable
             _gameEngine.Object,
             _navigation.Object,
             _achievementService.Object,
+            _achievementRepository.Object,
             _highScoreService.Object,
             _statisticsService.Object,
             _audioManager.Object,
@@ -85,6 +87,7 @@ public sealed class GameViewModelTests : IDisposable
             gameEngine.Object,
             _navigation.Object,
             _achievementService.Object,
+            _achievementRepository.Object,
             _highScoreService.Object,
             _statisticsService.Object,
             audioManager.Object,
