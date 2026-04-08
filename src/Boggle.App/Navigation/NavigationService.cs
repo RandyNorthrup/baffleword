@@ -1,5 +1,5 @@
-// <copyright file="NavigationService.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="NavigationService.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.App.Navigation;
@@ -16,6 +16,7 @@ public sealed class NavigationService : INavigationService
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<NavigationService> _logger;
     private ViewModelBase? _previousViewModel;
+    private bool _disposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NavigationService"/> class.
@@ -80,5 +81,27 @@ public sealed class NavigationService : INavigationService
         _previousViewModel = null;
         NavigationChanged?.Invoke(this, EventArgs.Empty);
         return true;
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            if (_previousViewModel is IDisposable previousDisposable)
+            {
+                previousDisposable.Dispose();
+            }
+
+            if (CurrentViewModel is IDisposable currentDisposable)
+            {
+                currentDisposable.Dispose();
+            }
+
+            _previousViewModel = null;
+            CurrentViewModel = null;
+            _disposed = true;
+            _logger.LogDebug("NavigationService disposed");
+        }
     }
 }

@@ -35,6 +35,6 @@
     </Window.Resources>
 
     <Grid>
-        <ContentControl x:Name="ContentArea" Content="{Binding CurrentViewModel}" />
+        <ContentControl x:Name="ContentArea" />
     </Grid>
 </Window>

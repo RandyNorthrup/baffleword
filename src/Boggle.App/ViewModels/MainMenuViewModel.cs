@@ -1,5 +1,5 @@
-// <copyright file="MainMenuViewModel.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="MainMenuViewModel.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.App.ViewModels;
@@ -8,6 +8,7 @@ using System.Windows.Input;
 using Boggle.App.Navigation;
 using Boggle.Core.Models;
 using Boggle.Core.Repositories;
+using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// ViewModel for the main menu view.
@@ -16,16 +17,19 @@ public sealed class MainMenuViewModel : ViewModelBase
 {
     private readonly INavigationService _navigation;
     private readonly ISettingsRepository _settingsRepository;
+    private readonly ILogger<MainMenuViewModel> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainMenuViewModel"/> class.
     /// </summary>
     /// <param name="navigation">The navigation service.</param>
     /// <param name="settingsRepository">The settings repository.</param>
-    public MainMenuViewModel(INavigationService navigation, ISettingsRepository settingsRepository)
+    /// <param name="logger">The logger instance.</param>
+    public MainMenuViewModel(INavigationService navigation, ISettingsRepository settingsRepository, ILogger<MainMenuViewModel> logger)
     {
         _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
         _settingsRepository = settingsRepository ?? throw new ArgumentNullException(nameof(settingsRepository));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         PlayStandardCommand = new RelayCommand(() => _ = LaunchGameAsync(GameMode.Standard));
         PlayBigBoggleCommand = new RelayCommand(() => _ = LaunchGameAsync(GameMode.BigBoggle));
@@ -73,8 +77,15 @@ public sealed class MainMenuViewModel : ViewModelBase
 
     private async Task LaunchGameAsync(GameMode mode)
     {
-        await _settingsRepository.SetAsync("GameMode", mode.ToString()).ConfigureAwait(true);
-        _navigation.NavigateTo<GameViewModel>();
+        try
+        {
+            await _settingsRepository.SetAsync("GameMode", mode.ToString()).ConfigureAwait(true);
+            _navigation.NavigateTo<GameViewModel>();
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            _logger.LogError(ex, "Error launching {Mode} game", mode);
+        }
     }
 
     private void OnHighScores()

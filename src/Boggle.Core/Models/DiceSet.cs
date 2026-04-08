@@ -1,5 +1,5 @@
-// <copyright file="DiceSet.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+﻿// <copyright file="DiceSet.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Models;
@@ -12,7 +12,7 @@ public static class DiceSet
     /// <summary>
     /// The face value representing a blocked position on the board.
     /// </summary>
-    public const string BlockedFace = "■";
+    public const string BlockedFace = "";
 
     /// <summary>
     /// Gets the standard set of 16 Boggle dice (Hasbro "New Boggle" C2187).
@@ -38,7 +38,7 @@ public static class DiceSet
     };
 
     /// <summary>
-    /// Gets the Big Boggle Deluxe set of 25 dice (5×5 grid).
+    /// Gets the Big Boggle Deluxe set of 25 dice (5x5 grid).
     /// </summary>
     public static IReadOnlyList<Die> BigBoggleDice { get; } = new Die[]
     {
@@ -70,7 +70,7 @@ public static class DiceSet
     };
 
     /// <summary>
-    /// Gets the Super Big Boggle set of 36 dice (6×6 grid).
+    /// Gets the Super Big Boggle set of 36 dice (6x6 grid).
     /// Includes two-letter combo faces (QU, IN, TH, ER, HE, AN) and blocked faces.
     /// </summary>
     public static IReadOnlyList<Die> SuperBigBoggleDice { get; } = new Die[]
@@ -114,11 +114,6 @@ public static class DiceSet
     };
 
     /// <summary>
-    /// Gets the number of dice in a standard Boggle set.
-    /// </summary>
-    public static int Count => StandardDice.Count;
-
-    /// <summary>
     /// Gets the dice set for the specified game mode.
     /// </summary>
     /// <param name="mode">The game mode.</param>
@@ -127,9 +122,10 @@ public static class DiceSet
     {
         return mode switch
         {
+            GameMode.Standard => StandardDice,
             GameMode.BigBoggle => BigBoggleDice,
             GameMode.SuperBigBoggle => SuperBigBoggleDice,
-            _ => StandardDice,
+            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unknown game mode."),
         };
     }
 }

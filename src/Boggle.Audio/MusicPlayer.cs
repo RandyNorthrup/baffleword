@@ -1,5 +1,5 @@
-// <copyright file="MusicPlayer.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="MusicPlayer.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Audio;
@@ -64,9 +64,9 @@ public sealed class MusicPlayer : IMusicPlayer
         set
         {
             _volume = Math.Clamp(value, 0f, 1f);
-            if (_waveOut is not null)
+            if (_audioReader is not null)
             {
-                _waveOut.Volume = _volume;
+                _audioReader.Volume = _volume;
             }
         }
     }
@@ -96,10 +96,9 @@ public sealed class MusicPlayer : IMusicPlayer
         {
             _currentFilePath = filePath;
             _loop = shouldLoop;
-            _audioReader = new AudioFileReader(filePath);
+            _audioReader = new AudioFileReader(filePath) { Volume = _volume };
             _waveOut = new WaveOutEvent();
             _waveOut.Init(_audioReader);
-            _waveOut.Volume = _volume;
 
             _waveOut.PlaybackStopped += OnPlaybackStopped;
 
@@ -121,7 +120,17 @@ public sealed class MusicPlayer : IMusicPlayer
     }
 
     /// <inheritdoc/>
-    public void PausePlayback()
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            StopPlayback();
+            _disposed = true;
+            _logger.LogDebug("MusicPlayer disposed");
+        }
+    }
+
+    private void PausePlayback()
     {
         if (_waveOut?.PlaybackState == PlaybackState.Playing)
         {
@@ -130,8 +139,7 @@ public sealed class MusicPlayer : IMusicPlayer
         }
     }
 
-    /// <inheritdoc/>
-    public void ResumePlayback()
+    private void ResumePlayback()
     {
         if (_waveOut?.PlaybackState == PlaybackState.Paused)
         {
@@ -140,8 +148,7 @@ public sealed class MusicPlayer : IMusicPlayer
         }
     }
 
-    /// <inheritdoc/>
-    public void StopPlayback()
+    private void StopPlayback()
     {
         if (_waveOut is not null)
         {
@@ -157,20 +164,15 @@ public sealed class MusicPlayer : IMusicPlayer
         _currentFilePath = null;
     }
 
-    /// <inheritdoc/>
-    public void Dispose()
-    {
-        if (!_disposed)
-        {
-            StopPlayback();
-            _disposed = true;
-            _logger.LogDebug("MusicPlayer disposed");
-        }
-    }
-
     private void OnPlaybackStopped(object? sender, StoppedEventArgs e)
     {
-        if (_loop && !_disposed && _currentFilePath is not null && _audioReader is not null)
+        if (e.Exception is not null)
+        {
+            _logger.LogError(e.Exception, "Music playback error");
+            return;
+        }
+
+        if (_loop && !_disposed && !_isMuted && _currentFilePath is not null && _audioReader is not null)
         {
             _audioReader.Position = 0;
             _waveOut?.Play();

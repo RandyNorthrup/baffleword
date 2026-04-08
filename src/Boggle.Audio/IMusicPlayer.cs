@@ -1,5 +1,5 @@
-// <copyright file="IMusicPlayer.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="IMusicPlayer.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Audio;
@@ -30,19 +30,4 @@ public interface IMusicPlayer : IDisposable
     /// <param name="filePath">The path to the music file.</param>
     /// <param name="shouldLoop">Whether to loop the track.</param>
     void Play(string filePath, bool shouldLoop = true);
-
-    /// <summary>
-    /// Pauses the music.
-    /// </summary>
-    void PausePlayback();
-
-    /// <summary>
-    /// Resumes the music.
-    /// </summary>
-    void ResumePlayback();
-
-    /// <summary>
-    /// Stops the music.
-    /// </summary>
-    void StopPlayback();
 }

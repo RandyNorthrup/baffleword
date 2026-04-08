@@ -1,5 +1,5 @@
-// <copyright file="SoundEffect.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="SoundEffect.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Audio;
@@ -39,15 +39,9 @@ public enum SoundEffect
     /// <summary>Crisp click on button press.</summary>
     ButtonClick,
 
-    /// <summary>Celebratory ascending sequence.</summary>
-    HighScore,
-
     /// <summary>Soft whoosh down on pause.</summary>
     Pause,
 
     /// <summary>Soft whoosh up on resume.</summary>
     Resume,
-
-    /// <summary>Subtle shuffle sound when dragging over tiles.</summary>
-    TileShuffle,
 }

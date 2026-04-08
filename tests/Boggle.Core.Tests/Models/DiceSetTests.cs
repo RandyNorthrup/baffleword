@@ -1,5 +1,5 @@
-// <copyright file="DiceSetTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="DiceSetTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Tests.Models;
@@ -17,12 +17,6 @@ public sealed class DiceSetTests
     public void StandardDice_Has16Dice()
     {
         DiceSet.StandardDice.Should().HaveCount(16);
-    }
-
-    [Fact]
-    public void Count_Returns16()
-    {
-        DiceSet.Count.Should().Be(16);
     }
 
     [Fact]

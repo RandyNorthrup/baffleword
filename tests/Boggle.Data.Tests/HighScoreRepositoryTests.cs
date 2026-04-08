@@ -1,5 +1,5 @@
-// <copyright file="HighScoreRepositoryTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="HighScoreRepositoryTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Data.Tests;
@@ -95,15 +95,17 @@ public sealed class HighScoreRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task ClearAllAsync_RemovesAllScores()
+    public async Task AddAsync_PrunesEntriesBeyond50PerGameMode()
     {
-        await _sut.AddAsync(CreateEntry(100));
-        await _sut.AddAsync(CreateEntry(200));
+        for (int i = 1; i <= 51; i++)
+        {
+            await _sut.AddAsync(CreateEntry(i * 10));
+        }
 
-        await _sut.ClearAllAsync();
+        IReadOnlyList<HighScoreEntry> scores = await _sut.GetTopAsync(GameModeFilter, 100);
 
-        IReadOnlyList<HighScoreEntry> scores = await _sut.GetTopAsync(GameModeFilter, 10);
-        scores.Should().BeEmpty();
+        scores.Should().HaveCount(50);
+        scores.Should().NotContain(s => s.Score == 10, "the lowest score should have been pruned");
     }
 
     private static HighScoreEntry CreateEntry(int score) => new()

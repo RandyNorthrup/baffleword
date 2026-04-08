@@ -1,5 +1,5 @@
-// <copyright file="WordValidatorTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+﻿// <copyright file="WordValidatorTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Tests.Services;
@@ -71,7 +71,7 @@ public sealed class WordValidatorTests
     public void Validate_ValidWordOnBoard_ReturnsValid()
     {
         // Board: A B C D / E F G H / I J K L / M N O P
-        // "ABF" is valid path: (0,0) → (0,1) → (1,1)
+        // "ABF" is valid path: (0,0) -> (0,1) -> (1,1)
         _dictionaryMock.Setup(d => d.IsValidWord("ABF")).Returns(true);
         GameBoard board = CreateTestBoard();
 
@@ -94,13 +94,13 @@ public sealed class WordValidatorTests
     [Fact]
     public void Validate_WordThroughBlockedCell_ReturnsNotOnBoard()
     {
-        // Board: A B / ■ D — blocked cell at (1,0)
+        // Board: A B / [blocked] D -- blocked cell at (1,0)
         // A word requiring the blocked cell should fail
         _dictionaryMock.Setup(d => d.IsValidWord(It.IsAny<string>())).Returns(true);
         GameBoard board = CreateBoardWithBlockedCell();
 
         // Try to validate a word that would need to go through the blocked cell
-        // The blocked cell has letter "■" which can't form any real word
+        // The blocked cell is skipped during path-finding
         WordStatus result = _sut.Validate("AB", board, 2);
 
         result.Should().Be(WordStatus.Valid); // AB doesn't need blocked cell
@@ -124,7 +124,7 @@ public sealed class WordValidatorTests
         _dictionaryMock.Setup(d => d.IsValidWord("ABGH")).Returns(true);
         GameBoard board = Create5x5TestBoard();
 
-        // "ABGH" path: (0,0)→(0,1)→(1,1)→(1,2) — all adjacent
+        // "ABGH" path: (0,0)->(0,1)->(1,1)->(1,2) -- all adjacent
         WordStatus result = _sut.Validate("ABGH", board, 4);
 
         result.Should().Be(WordStatus.Valid);

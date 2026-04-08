@@ -1,5 +1,5 @@
-// <copyright file="BoggleDatabase.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="BoggleDatabase.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Data;
@@ -27,11 +27,6 @@ public sealed class BoggleDatabase : IBoggleDatabase
         _connectionString = connectionString;
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
-
-    /// <summary>
-    /// Gets the connection string used by this database.
-    /// </summary>
-    public string ConnectionString => _connectionString;
 
     /// <inheritdoc/>
     public async Task InitializeAsync()
@@ -79,15 +74,16 @@ public sealed class BoggleDatabase : IBoggleDatabase
         await command.ExecuteNonQueryAsync().ConfigureAwait(false);
 
         // Migrate existing databases: add GameMode column if it doesn't exist
-        using SqliteCommand migrateCommand = connection.CreateCommand();
-        migrateCommand.CommandText = "ALTER TABLE HighScores ADD COLUMN GameMode TEXT NOT NULL DEFAULT 'Standard'";
-        try
+        using SqliteCommand checkCommand = connection.CreateCommand();
+        checkCommand.CommandText = "SELECT COUNT(*) FROM pragma_table_info('HighScores') WHERE name = 'GameMode'";
+        long columnExists = (long)(await checkCommand.ExecuteScalarAsync().ConfigureAwait(false))!;
+
+        if (columnExists == 0)
         {
+            using SqliteCommand migrateCommand = connection.CreateCommand();
+            migrateCommand.CommandText = "ALTER TABLE HighScores ADD COLUMN GameMode TEXT NOT NULL DEFAULT 'Standard'";
             await migrateCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
-        }
-        catch (SqliteException)
-        {
-            // Column already exists — ignore
+            _logger.LogInformation("Migrated HighScores table: added GameMode column");
         }
 
         _logger.LogInformation("Database initialized successfully");

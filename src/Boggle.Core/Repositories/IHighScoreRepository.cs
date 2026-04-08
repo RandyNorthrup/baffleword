@@ -1,5 +1,5 @@
-// <copyright file="IHighScoreRepository.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="IHighScoreRepository.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Repositories;
@@ -33,10 +33,4 @@ public interface IHighScoreRepository
     /// <param name="topN">The number of top positions to consider.</param>
     /// <returns>The minimum score in the top N, or 0 if fewer than N entries exist.</returns>
     Task<int> GetMinimumTopScoreAsync(string gameMode, int topN);
-
-    /// <summary>
-    /// Deletes all high score entries.
-    /// </summary>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    Task ClearAllAsync();
 }

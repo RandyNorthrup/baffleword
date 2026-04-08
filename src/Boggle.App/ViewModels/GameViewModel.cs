@@ -1,5 +1,5 @@
-﻿// <copyright file="GameViewModel.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+﻿// <copyright file="GameViewModel.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.App.ViewModels;
@@ -14,9 +14,10 @@ using Boggle.Audio;
 using Boggle.Core.Models;
 using Boggle.Core.Repositories;
 using Boggle.Core.Services;
+using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// ViewModel for the game view â€” manages round lifecycle and word submission.
+/// ViewModel for the game view -- manages round lifecycle and word submission.
 /// </summary>
 public sealed class GameViewModel : ViewModelBase, IDisposable
 {
@@ -28,6 +29,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
     private readonly IStatisticsService _statisticsService;
     private readonly IAudioManager _audioManager;
     private readonly ISettingsRepository _settingsRepository;
+    private readonly ILogger<GameViewModel> _logger;
     private readonly DispatcherTimer _timer;
     private readonly List<TileViewModel> _selectedPath = [];
 
@@ -37,7 +39,6 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
     private TimeSpan _timerDuration;
     private bool _isPaused;
     private string _lastSubmissionFeedback = string.Empty;
-    private string[][] _boardLetters = [];
     private GameRound? _currentRound;
     private bool _isDragging;
 
@@ -60,6 +61,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
     /// <param name="statisticsService">The statistics service.</param>
     /// <param name="audioManager">The audio manager.</param>
     /// <param name="settingsRepository">The settings repository.</param>
+    /// <param name="logger">The logger instance.</param>
     public GameViewModel(
         IGameEngine gameEngine,
         INavigationService navigation,
@@ -68,7 +70,8 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
         IHighScoreService highScoreService,
         IStatisticsService statisticsService,
         IAudioManager audioManager,
-        ISettingsRepository settingsRepository)
+        ISettingsRepository settingsRepository,
+        ILogger<GameViewModel> logger)
     {
         _gameEngine = gameEngine ?? throw new ArgumentNullException(nameof(gameEngine));
         _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
@@ -78,8 +81,8 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
         _statisticsService = statisticsService ?? throw new ArgumentNullException(nameof(statisticsService));
         _audioManager = audioManager ?? throw new ArgumentNullException(nameof(audioManager));
         _settingsRepository = settingsRepository ?? throw new ArgumentNullException(nameof(settingsRepository));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-        SubmitWordCommand = new RelayCommand(OnSubmitWord, () => !string.IsNullOrWhiteSpace(CurrentWord) && !IsPaused);
         PauseCommand = new RelayCommand(OnPause, () => !IsPaused);
         ResumeCommand = new RelayCommand(OnResume, () => IsPaused);
         QuitCommand = new RelayCommand(OnQuit);
@@ -179,15 +182,6 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
     }
 
     /// <summary>
-    /// Gets the board letters for display.
-    /// </summary>
-    public string[][] BoardLetters
-    {
-        get => _boardLetters;
-        private set => SetProperty(ref _boardLetters, value);
-    }
-
-    /// <summary>
     /// Gets the collection of found words.
     /// </summary>
     public ObservableCollection<WordResult> FoundWords { get; }
@@ -264,11 +258,6 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
         get => _boardContainerSize;
         private set => SetProperty(ref _boardContainerSize, value);
     }
-
-    /// <summary>
-    /// Gets the command to submit a word.
-    /// </summary>
-    public ICommand SubmitWordCommand { get; }
 
     /// <summary>
     /// Gets the command to pause the game.
@@ -376,19 +365,27 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
 
     private async Task InitializeAsync()
     {
-        GameMode mode = GameMode.Standard;
-
-        string? modeSetting = await _settingsRepository.GetAsync("GameMode").ConfigureAwait(true);
-        if (modeSetting != null && Enum.TryParse<GameMode>(modeSetting, out GameMode gm))
+        try
         {
-            mode = gm;
+            GameMode mode = GameMode.Standard;
+
+            string? modeSetting = await _settingsRepository.GetAsync("GameMode").ConfigureAwait(true);
+            if (modeSetting != null && Enum.TryParse<GameMode>(modeSetting, out GameMode gm))
+            {
+                mode = gm;
+            }
+
+            GameModeConfig config = GameModeConfig.ForMode(mode);
+            int timerSeconds = config.DefaultTimerSeconds;
+            int minWordLength = config.MinWordLength;
+
+            StartNewRound(TimeSpan.FromSeconds(timerSeconds), minWordLength, mode);
         }
-
-        GameModeConfig config = GameModeConfig.ForMode(mode);
-        int timerSeconds = config.DefaultTimerSeconds;
-        int minWordLength = config.MinWordLength;
-
-        StartNewRound(TimeSpan.FromSeconds(timerSeconds), minWordLength, mode);
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            _logger.LogError(ex, "Error initializing game");
+            _navigation.NavigateTo<MainMenuViewModel>();
+        }
     }
 
     private void StartNewRound(TimeSpan duration, int minWordLength, GameMode mode = GameMode.Standard)
@@ -406,20 +403,16 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
         // Calculate tile sizing based on board dimensions
         UpdateBoardSizing(board.Rows);
 
-        string[][] letters = new string[board.Rows][];
         Tiles.Clear();
         for (int row = 0; row < board.Rows; row++)
         {
-            letters[row] = new string[board.Columns];
             for (int col = 0; col < board.Columns; col++)
             {
                 BoardCell cell = board[row, col];
-                letters[row][col] = cell.Letter;
                 Tiles.Add(new TileViewModel(cell.Letter, row, col, cell.IsBlocked));
             }
         }
 
-        BoardLetters = letters;
         _audioManager.SoundEffects.Play(SoundEffect.RoundStart);
         _timer.Start();
     }
@@ -454,7 +447,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
         _selectedPath.Add(tile);
         tile.IsSelected = true;
         tile.SelectionOrder = _selectedPath.Count;
-        _audioManager.SoundEffects.Play(Audio.SoundEffect.TileShuffle);
+        _audioManager.SoundEffects.Play(Audio.SoundEffect.TileClick);
         UpdateCurrentWordFromPath();
     }
 
@@ -482,40 +475,35 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
 
     private async void OnTimerTick(object? sender, EventArgs e)
     {
-        TimeRemaining -= TimeSpan.FromMilliseconds(100);
-        if (TimeRemaining <= TimeSpan.Zero)
+        try
         {
-            _timer.Stop();
-            TimeRemaining = TimeSpan.Zero;
-            await EndRoundAsync().ConfigureAwait(true);
+            TimeRemaining -= TimeSpan.FromMilliseconds(100);
+            if (TimeRemaining <= TimeSpan.Zero)
+            {
+                _timer.Stop();
+                TimeRemaining = TimeSpan.Zero;
+                await EndRoundAsync().ConfigureAwait(true);
+            }
+            else if (TimeRemaining.TotalSeconds <= 5 && TimeRemaining.Milliseconds < 100)
+            {
+                _audioManager.SoundEffects.Play(SoundEffect.TimerWarning);
+            }
+            else if (TimeRemaining.TotalSeconds <= 10 && TimeRemaining.Milliseconds < 100)
+            {
+                _audioManager.SoundEffects.Play(SoundEffect.TimerTick);
+            }
         }
-        else if (TimeRemaining.TotalSeconds <= 5 && TimeRemaining.Milliseconds < 100)
+        catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            _audioManager.SoundEffects.Play(SoundEffect.TimerWarning);
+            _logger.LogError(ex, "Error during timer tick");
         }
-        else if (TimeRemaining.TotalSeconds <= 10 && TimeRemaining.Milliseconds < 100)
-        {
-            _audioManager.SoundEffects.Play(SoundEffect.TimerTick);
-        }
-    }
-
-    private void OnSubmitWord()
-    {
-        string word = CurrentWord.Trim();
-        if (string.IsNullOrWhiteSpace(word))
-        {
-            return;
-        }
-
-        ProcessWordResult(_gameEngine.SubmitWord(word));
-        CurrentWord = string.Empty;
     }
 
     private void ProcessWordResult(WordResult result)
     {
         if (result.Status == WordStatus.Valid)
         {
-            FoundWords.Insert(0, result);
+            FoundWords.Add(result);
         }
 
         Score = _currentRound?.Score ?? 0;
@@ -565,7 +553,13 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
             GameRound completedRound = _gameEngine.EndRound();
             _currentRound = null;
 
+            // Retrieve current stats before persistence so "personal best" checks
+            // compare against the pre-round values while cumulative totals reflect
+            // this round (avoiding an off-by-one on achievements like "First Words").
             GameStatistics stats = await _statisticsService.GetStatisticsAsync().ConfigureAwait(true);
+            stats.TotalRoundsPlayed++;
+            stats.TotalWordsFound += completedRound.ValidWordCount;
+
             IReadOnlyList<Achievement> unlocked = _achievementService.CheckAchievements(completedRound, stats);
             await _highScoreService.TryRecordScoreAsync(completedRound).ConfigureAwait(true);
             await _statisticsService.UpdateStatisticsAsync(completedRound).ConfigureAwait(true);
@@ -583,9 +577,9 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
                     AchievementToasts.Add(achievement);
                 }
 
-                // Brief delay so toasts are visible before navigating
-                await Task.Delay(2000 + (unlocked.Count * 500)).ConfigureAwait(true);
-                AchievementToasts.Clear();
+                // Wait for all toasts to display (5s) and fade out (400ms), staggered 300ms apart
+                int staggerMs = (unlocked.Count - 1) * 300;
+                await Task.Delay(staggerMs + 5000 + 500).ConfigureAwait(true);
             }
 
             _navigation.NavigateTo<RoundResultsViewModel>();
@@ -596,7 +590,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            System.Diagnostics.Debug.WriteLine($"EndRoundAsync error: {ex}");
+            _logger.LogError(ex, "Error ending round");
             _navigation.NavigateTo<MainMenuViewModel>();
         }
     }
@@ -606,9 +600,17 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
         _timer.Stop();
         IsTimerWarning = false;
 
-        if (_currentRound != null && _currentRound.State != GameRoundState.Ended)
+        try
         {
-            _gameEngine.EndRound();
+            if (_currentRound != null && _currentRound.State != GameRoundState.Ended)
+            {
+                _gameEngine.EndRound();
+                _currentRound = null;
+            }
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            _logger.LogError(ex, "Error ending round during quit");
             _currentRound = null;
         }
 

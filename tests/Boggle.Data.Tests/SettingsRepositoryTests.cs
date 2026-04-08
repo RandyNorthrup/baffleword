@@ -1,5 +1,5 @@
-// <copyright file="SettingsRepositoryTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="SettingsRepositoryTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Data.Tests;
@@ -61,19 +61,5 @@ public sealed class SettingsRepositoryTests : IDisposable
 
         string? value = await _sut.GetAsync("volume");
         value.Should().Be("80");
-    }
-
-    [Fact]
-    public async Task ClearAllAsync_RemovesAllSettings()
-    {
-        await _sut.SetAsync("key1", "value1");
-        await _sut.SetAsync("key2", "value2");
-
-        await _sut.ClearAllAsync();
-
-        string? val1 = await _sut.GetAsync("key1");
-        string? val2 = await _sut.GetAsync("key2");
-        val1.Should().BeNull();
-        val2.Should().BeNull();
     }
 }

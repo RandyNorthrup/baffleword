@@ -1,5 +1,5 @@
-// <copyright file="HighScoresViewModelTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="HighScoresViewModelTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.App.Tests.ViewModels;
@@ -9,6 +9,7 @@ using Boggle.App.ViewModels;
 using Boggle.Core.Models;
 using Boggle.Core.Services;
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
@@ -26,7 +27,7 @@ public sealed class HighScoresViewModelTests
     [Fact]
     public void BackCommand_NavigatesToMainMenu()
     {
-        var sut = new HighScoresViewModel(_highScoreService.Object, _navigation.Object);
+        var sut = new HighScoresViewModel(_highScoreService.Object, _navigation.Object, NullLogger<HighScoresViewModel>.Instance);
 
         sut.BackCommand.Execute(null);
 
@@ -36,7 +37,7 @@ public sealed class HighScoresViewModelTests
     [Fact]
     public void Scores_InitiallyEmpty()
     {
-        var sut = new HighScoresViewModel(_highScoreService.Object, _navigation.Object);
+        var sut = new HighScoresViewModel(_highScoreService.Object, _navigation.Object, NullLogger<HighScoresViewModel>.Instance);
 
         sut.Scores.Should().BeEmpty();
     }
@@ -53,7 +54,7 @@ public sealed class HighScoresViewModelTests
         _highScoreService.Setup(s => s.GetTopScoresAsync(It.IsAny<GameMode>(), It.IsAny<int>()))
             .ReturnsAsync(entries);
 
-        var sut = new HighScoresViewModel(_highScoreService.Object, _navigation.Object);
+        var sut = new HighScoresViewModel(_highScoreService.Object, _navigation.Object, NullLogger<HighScoresViewModel>.Instance);
 
         // Allow the async load to complete
         await Task.Delay(100);
@@ -64,7 +65,7 @@ public sealed class HighScoresViewModelTests
     [Fact]
     public void SelectedMode_DefaultsToStandard()
     {
-        var sut = new HighScoresViewModel(_highScoreService.Object, _navigation.Object);
+        var sut = new HighScoresViewModel(_highScoreService.Object, _navigation.Object, NullLogger<HighScoresViewModel>.Instance);
 
         sut.SelectedMode.Should().Be(GameMode.Standard);
         sut.IsStandardSelected.Should().BeTrue();
@@ -75,7 +76,7 @@ public sealed class HighScoresViewModelTests
     [Fact]
     public void ShowBigBoggleCommand_ChangesSelectedMode()
     {
-        var sut = new HighScoresViewModel(_highScoreService.Object, _navigation.Object);
+        var sut = new HighScoresViewModel(_highScoreService.Object, _navigation.Object, NullLogger<HighScoresViewModel>.Instance);
 
         sut.ShowBigBoggleCommand.Execute(null);
 
@@ -86,14 +87,14 @@ public sealed class HighScoresViewModelTests
     [Fact]
     public void Constructor_ThrowsOnNullHighScoreService()
     {
-        FluentActions.Invoking(() => new HighScoresViewModel(null!, _navigation.Object))
+        FluentActions.Invoking(() => new HighScoresViewModel(null!, _navigation.Object, NullLogger<HighScoresViewModel>.Instance))
             .Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
     public void Constructor_ThrowsOnNullNavigation()
     {
-        FluentActions.Invoking(() => new HighScoresViewModel(_highScoreService.Object, null!))
+        FluentActions.Invoking(() => new HighScoresViewModel(_highScoreService.Object, null!, NullLogger<HighScoresViewModel>.Instance))
             .Should().Throw<ArgumentNullException>();
     }
 }

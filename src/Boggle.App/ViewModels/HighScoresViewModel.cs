@@ -1,5 +1,5 @@
-// <copyright file="HighScoresViewModel.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="HighScoresViewModel.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.App.ViewModels;
@@ -9,6 +9,7 @@ using System.Windows.Input;
 using Boggle.App.Navigation;
 using Boggle.Core.Models;
 using Boggle.Core.Services;
+using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// ViewModel for the high scores view.
@@ -17,6 +18,7 @@ public sealed class HighScoresViewModel : ViewModelBase
 {
     private readonly IHighScoreService _highScoreService;
     private readonly INavigationService _navigation;
+    private readonly ILogger<HighScoresViewModel> _logger;
     private GameMode _selectedMode = GameMode.Standard;
 
     /// <summary>
@@ -24,10 +26,12 @@ public sealed class HighScoresViewModel : ViewModelBase
     /// </summary>
     /// <param name="highScoreService">The high score service.</param>
     /// <param name="navigation">The navigation service.</param>
-    public HighScoresViewModel(IHighScoreService highScoreService, INavigationService navigation)
+    /// <param name="logger">The logger instance.</param>
+    public HighScoresViewModel(IHighScoreService highScoreService, INavigationService navigation, ILogger<HighScoresViewModel> logger)
     {
         _highScoreService = highScoreService ?? throw new ArgumentNullException(nameof(highScoreService));
         _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         BackCommand = new RelayCommand(OnBack);
         ShowStandardCommand = new RelayCommand(() => _ = SelectModeAsync(GameMode.Standard));
@@ -96,17 +100,31 @@ public sealed class HighScoresViewModel : ViewModelBase
 
     private async Task SelectModeAsync(GameMode mode)
     {
-        SelectedMode = mode;
-        await LoadScoresAsync().ConfigureAwait(true);
+        try
+        {
+            SelectedMode = mode;
+            await LoadScoresAsync().ConfigureAwait(true);
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            _logger.LogError(ex, "Error selecting mode {Mode}", mode);
+        }
     }
 
     private async Task LoadScoresAsync()
     {
-        IReadOnlyList<HighScoreEntry> scores = await _highScoreService.GetTopScoresAsync(_selectedMode, 50).ConfigureAwait(true);
-        Scores.Clear();
-        foreach (HighScoreEntry entry in scores)
+        try
         {
-            Scores.Add(entry);
+            IReadOnlyList<HighScoreEntry> scores = await _highScoreService.GetTopScoresAsync(_selectedMode, 50).ConfigureAwait(true);
+            Scores.Clear();
+            foreach (HighScoreEntry entry in scores)
+            {
+                Scores.Add(entry);
+            }
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            _logger.LogError(ex, "Error loading scores");
         }
     }
 

@@ -1,5 +1,5 @@
-// <copyright file="AchievementRepository.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="AchievementRepository.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Data.Repositories;
@@ -8,7 +8,6 @@ using System.Globalization;
 using Boggle.Core.Models;
 using Boggle.Core.Repositories;
 using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// SQLite-based achievement repository.
@@ -16,17 +15,14 @@ using Microsoft.Extensions.Logging;
 public sealed class AchievementRepository : IAchievementRepository
 {
     private readonly BoggleDatabase _database;
-    private readonly ILogger<AchievementRepository> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AchievementRepository"/> class.
     /// </summary>
     /// <param name="database">The database instance.</param>
-    /// <param name="logger">The logger instance.</param>
-    public AchievementRepository(BoggleDatabase database, ILogger<AchievementRepository> logger)
+    public AchievementRepository(BoggleDatabase database)
     {
         _database = database ?? throw new ArgumentNullException(nameof(database));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <inheritdoc/>
@@ -82,18 +78,5 @@ public sealed class AchievementRepository : IAchievementRepository
         command.Parameters.AddWithValue("@UnlockedAt", unlockedAtValue);
 
         await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-    }
-
-    /// <inheritdoc/>
-    public async Task ClearAllAsync()
-    {
-        using SqliteConnection connection = _database.CreateConnection();
-        await connection.OpenAsync().ConfigureAwait(false);
-
-        using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = "DELETE FROM Achievements";
-        await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-
-        _logger.LogInformation("All achievements cleared");
     }
 }

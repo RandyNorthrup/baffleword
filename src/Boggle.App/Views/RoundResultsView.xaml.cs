@@ -1,5 +1,5 @@
-// <copyright file="RoundResultsView.xaml.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="RoundResultsView.xaml.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.App.Views;
@@ -21,25 +21,6 @@ public partial class RoundResultsView : UserControl
     {
         InitializeComponent();
         Loaded += OnLoaded;
-    }
-
-    private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent)
-        where T : DependencyObject
-    {
-        int count = VisualTreeHelper.GetChildrenCount(parent);
-        for (int i = 0; i < count; i++)
-        {
-            DependencyObject child = VisualTreeHelper.GetChild(parent, i);
-            if (child is T match)
-            {
-                yield return match;
-            }
-
-            foreach (T grandchild in FindVisualChildren<T>(child))
-            {
-                yield return grandchild;
-            }
-        }
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)

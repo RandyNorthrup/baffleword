@@ -1,5 +1,5 @@
-// <copyright file="MainWindow.xaml.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="MainWindow.xaml.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.App;
@@ -28,11 +28,6 @@ public partial class MainWindow : Window
 
         DataContext = this;
     }
-
-    /// <summary>
-    /// Gets the current view model from the navigation service.
-    /// </summary>
-    public ViewModels.ViewModelBase? CurrentViewModel => _navigation.CurrentViewModel;
 
     private void OnNavigationChanged(object? sender, EventArgs e)
     {

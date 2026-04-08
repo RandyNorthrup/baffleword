@@ -1,5 +1,5 @@
-// <copyright file="StatisticsService.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="StatisticsService.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Services;
@@ -75,7 +75,6 @@ public sealed class StatisticsService : IStatisticsService
             TotalScore = await GetLongAsync("TotalScore").ConfigureAwait(false),
             HighestRoundScore = await GetIntAsync("HighestRoundScore").ConfigureAwait(false),
             TotalWordsFound = await GetIntAsync("TotalWordsFound").ConfigureAwait(false),
-            UniqueWordsFound = await GetIntAsync("UniqueWordsFound").ConfigureAwait(false),
             LongestWordEver = await GetStringAsync("LongestWordEver").ConfigureAwait(false),
             BestCompletionPercentage = await GetDoubleAsync("BestCompletionPercentage").ConfigureAwait(false),
             TotalPlayTime = TimeSpan.FromSeconds(await GetDoubleAsync("TotalPlayTimeSeconds").ConfigureAwait(false)),
@@ -90,7 +89,6 @@ public sealed class StatisticsService : IStatisticsService
         await _repository.SetAsync("TotalScore", stats.TotalScore.ToString(CultureInfo.InvariantCulture)).ConfigureAwait(false);
         await _repository.SetAsync("HighestRoundScore", stats.HighestRoundScore.ToString(CultureInfo.InvariantCulture)).ConfigureAwait(false);
         await _repository.SetAsync("TotalWordsFound", stats.TotalWordsFound.ToString(CultureInfo.InvariantCulture)).ConfigureAwait(false);
-        await _repository.SetAsync("UniqueWordsFound", stats.UniqueWordsFound.ToString(CultureInfo.InvariantCulture)).ConfigureAwait(false);
         await _repository.SetAsync("LongestWordEver", stats.LongestWordEver).ConfigureAwait(false);
         await _repository.SetAsync("BestCompletionPercentage", stats.BestCompletionPercentage.ToString(CultureInfo.InvariantCulture)).ConfigureAwait(false);
         await _repository.SetAsync("TotalPlayTimeSeconds", stats.TotalPlayTime.TotalSeconds.ToString(CultureInfo.InvariantCulture)).ConfigureAwait(false);

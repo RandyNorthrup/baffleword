@@ -1,5 +1,5 @@
-// <copyright file="AchievementService.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="AchievementService.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Services;
@@ -85,16 +85,16 @@ public sealed class AchievementService : IAchievementService
             5 => round.Score >= 200,                                                 // Double Century
             6 => HasWordOfLength(round, 7),                                          // Long Word
             7 => HasWordOfLength(round, 8),                                          // Monster Word
-            8 => false,                                                              // Speed Demon (checked externally with timing)
+            8 => CountValidWordsInFirstMinute(round) >= 10,                          // Speed Demon
             9 => round.CompletionPercentage >= 50.0,                                 // Perfectionist
             10 => round.CompletionPercentage >= 75.0,                                // Completionist
             11 => stats.TotalRoundsPlayed >= 10,                                     // Dedicated
             12 => stats.TotalRoundsPlayed >= 50,                                     // Veteran
             13 => stats.TotalRoundsPlayed >= 100,                                    // Marathon
             14 => round.Score > stats.HighestRoundScore,                             // High Roller
-            15 => false,                                                              // Quick Draw (checked externally with timing)
-            16 => stats.UniqueWordsFound >= 500,                                     // Vocabulary Builder
-            17 => stats.UniqueWordsFound >= 1000,                                    // Word Scholar
+            15 => HasValidWordWithinSeconds(round, 5),                               // Quick Draw
+            16 => stats.TotalWordsFound >= 500,                                     // Vocabulary Builder
+            17 => stats.TotalWordsFound >= 1000,                                    // Word Scholar
             18 => HasConsecutiveValidStreak(round, 5),                               // Streak Master
             19 => round.InvalidSubmissionCount == 0 && round.ValidWordCount > 0,     // No Mistakes
             20 => CountQuWords(round) >= 3,                                          // Qu Master
@@ -143,6 +143,20 @@ public sealed class AchievementService : IAchievementService
             w.Word.Contains("QU", StringComparison.OrdinalIgnoreCase));
     }
 
+    private static int CountValidWordsInFirstMinute(GameRound round)
+    {
+        DateTime cutoff = round.StartedAt.AddSeconds(60);
+        return round.SubmittedWords.Count(w =>
+            w.Status == WordStatus.Valid && w.SubmittedAt <= cutoff);
+    }
+
+    private static bool HasValidWordWithinSeconds(GameRound round, int seconds)
+    {
+        DateTime cutoff = round.StartedAt.AddSeconds(seconds);
+        return round.SubmittedWords.Any(w =>
+            w.Status == WordStatus.Valid && w.SubmittedAt <= cutoff);
+    }
+
     private static List<Achievement> CreateAchievementDefinitions()
     {
         return
@@ -162,8 +176,8 @@ public sealed class AchievementService : IAchievementService
             new() { Id = 13, Name = "Marathon", Description = "Play 100 rounds" },
             new() { Id = 14, Name = "High Roller", Description = "Achieve a new personal best score" },
             new() { Id = 15, Name = "Quick Draw", Description = "Submit a valid word within 5 seconds" },
-            new() { Id = 16, Name = "Vocabulary Builder", Description = "Find 500 unique words (lifetime)" },
-            new() { Id = 17, Name = "Word Scholar", Description = "Find 1000 unique words (lifetime)" },
+            new() { Id = 16, Name = "Vocabulary Builder", Description = "Find 500 words (lifetime)" },
+            new() { Id = 17, Name = "Word Scholar", Description = "Find 1000 words (lifetime)" },
             new() { Id = 18, Name = "Streak Master", Description = "Find 5 valid words in a row" },
             new() { Id = 19, Name = "No Mistakes", Description = "Complete a round with no invalid submissions" },
             new() { Id = 20, Name = "Qu Master", Description = "Find 3 words containing \"Qu\" in one round" },

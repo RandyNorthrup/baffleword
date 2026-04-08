@@ -2,7 +2,6 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- Font Family -->
-    <FontFamily x:Key="InterFont">pack://application:,,,/Assets/Fonts/#Inter</FontFamily>
     <FontFamily x:Key="DefaultFont">Segoe UI</FontFamily>
 
     <!-- Heading Styles -->
@@ -28,16 +27,6 @@
         <Setter Property="Foreground" Value="{StaticResource Gray700Brush}" />
     </Style>
 
-    <!-- Board Letter -->
-    <Style x:Key="BoardLetterStyle" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource DefaultFont}" />
-        <Setter Property="FontSize" Value="32" />
-        <Setter Property="FontWeight" Value="Bold" />
-        <Setter Property="Foreground" Value="{StaticResource Gray900Brush}" />
-        <Setter Property="HorizontalAlignment" Value="Center" />
-        <Setter Property="VerticalAlignment" Value="Center" />
-    </Style>
-
     <!-- Timer Display -->
     <Style x:Key="TimerStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}" />
@@ -53,13 +42,6 @@
         <Setter Property="FontSize" Value="24" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Foreground" Value="{StaticResource PrimaryBlueBrush}" />
-    </Style>
-
-    <!-- Button Text -->
-    <Style x:Key="ButtonTextStyle" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource DefaultFont}" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
     <!-- Caption / Small -->

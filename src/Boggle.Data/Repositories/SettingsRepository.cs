@@ -1,5 +1,5 @@
-// <copyright file="SettingsRepository.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="SettingsRepository.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Data.Repositories;
@@ -59,18 +59,5 @@ public sealed class SettingsRepository : ISettingsRepository
 
         await command.ExecuteNonQueryAsync().ConfigureAwait(false);
         _logger.LogDebug("Setting '{Key}' updated", key);
-    }
-
-    /// <inheritdoc/>
-    public async Task ClearAllAsync()
-    {
-        using SqliteConnection connection = _database.CreateConnection();
-        await connection.OpenAsync().ConfigureAwait(false);
-
-        using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = "DELETE FROM Settings";
-        await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-
-        _logger.LogInformation("All settings cleared");
     }
 }

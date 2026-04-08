@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.5.5] — 2026-04-08
+
+### Fixed
+- **Dead achievements**: Achievements #8 (Speed Demon — 10 words in first minute) and #15 (Quick Draw — valid word within 5 seconds) were hardcoded to `false` and could never unlock; implemented actual timing logic using new `WordResult.SubmittedAt` timestamp
+- **SoundEffectPlayer resource leak**: Restructured `Play()` with proper try/catch/finally to ensure `MemoryStream`, `WaveFileReader`, and `VolumeSampleProvider` are disposed on all failure paths
+- **GameViewModel quit error handling**: `OnQuit()` now catches exceptions from `EndRound()` and navigates to main menu regardless, preventing the user from getting stuck
+- **Music loop while muted**: `MusicPlayer.OnPlaybackStopped` now checks `!_isMuted` before restarting loop playback
+
+### Changed
+- **Achievement toast notifications**: Toasts now appear in the lower right, each stays for 5 seconds then fades out individually with a slide-right animation; remaining toasts drop down when lower ones dismiss
+- **Achievements page**: Achievement name and locked/unlocked status are now centered within each card
+- **Themed scrollbars**: All `ScrollBar` controls app-wide use a slim 8px themed style with rounded corners, matching the app color palette (Gray100 track, Gray300→Gray500→PrimaryBlue thumb states)
+- **Version**: Bumped to 1.5.5
+
+### Added
+- **`WordResult.SubmittedAt`**: UTC timestamp set automatically at construction for timing-based achievement checks
+- **Test count**: 310 tests, all passing
+
+---
+
 ## [1.5.1] — 2026-04-08
 
 ### Fixed
@@ -46,7 +66,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **View transition animations** (M9.5): Fade-out (120ms) then fade-in (200ms) on ContentControl when navigating between views
 - **Timer pulse** (M9.6): IsTimerWarning property on GameViewModel (true when ≤5s remaining), triggers red foreground + repeating ScaleTransform pulse (1.0→1.15) via XAML DataTrigger
 - **Button micro-interactions** (M9.7): ScaleTransform animations on PrimaryButtonStyle and SecondaryButtonStyle — hover scales to 1.03x (150ms), press scales to 0.97x (80ms), release returns to 1.03x
-- **Unlocked achievements in results**: GameViewModel now captures CheckAchievements return value, passes to RoundResultsViewModel.LoadResults; UnlockedAchievements ObservableCollection displayed with animated gold badges
+- **Achievement toast notifications**: GameViewModel captures CheckAchievements return value and displays unlocked achievements as in-game toast notifications
 - **Test count**: 242 tests, all passing
 
 ### Added — Milestone 8: Settings & How to Play
@@ -76,9 +96,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **HighScoresView**: Scrollable leaderboard showing score, words found, longest word, completion%, date; themed CardStyle container with SecondaryButton back navigation
 - **HighScoresViewModel**: Loads top 50 scores via IHighScoreService.GetTopScoresAsync, ObservableCollection binding, back navigation to main menu
 - **AchievementsView**: WrapPanel grid of achievement cards with opacity-based lock/unlock visual state (0.5 locked, 1.0 unlocked), lock/unlock icons, name + description display
-- **AchievementsViewModel**: Loads all 20 achievements from IAchievementService.GetAllAchievements(), ObservableCollection binding, back navigation
+- **AchievementsViewModel**: Loads all 26 achievements from IAchievementService.GetAllAchievements(), ObservableCollection binding, back navigation
 - **DataTemplate mapping**: MainWindow extended with implicit DataTemplates for HighScoresViewModel and AchievementsViewModel
-- **AchievementService**: All 20 achievement definitions and condition checks (implemented in M2, wired into game flow in M5 via GameViewModel.EndRoundAsync)
+- **AchievementService**: All 26 achievement definitions and condition checks (implemented in M2, wired into game flow in M5 via GameViewModel.EndRoundAsync)
 - **High score recording**: Wired into GameViewModel.EndRoundAsync with IHighScoreService persistence (implemented in M5)
 - **HighScoresViewModel tests** (5 tests): Back navigation, initial empty state, async score loading, null guard constructors
 - **AchievementsViewModel tests** (5 tests): Back navigation, achievement loading from service, empty state, null guard constructors
@@ -106,7 +126,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added — Milestone 2: Core Game Logic
 - **GameEngine tests** (17 tests): Round lifecycle (start/end/pause/resume), word submission (valid/invalid/duplicate/too short), state validation exceptions, board generation delegation, word normalization, completion percentage calculation
-- **AchievementService tests** (15 tests): All 20 achievement definitions verified, condition checks (FirstWords, WordHoarder, Centurion, LongWord, MonsterWord, Dedicated, NoMistakes, StreakMaster, QuMaster, VocabularyBuilder, HighRoller), already-unlocked guard, LoadState restore
+- **AchievementService tests** (15 tests): All 26 achievement definitions verified, condition checks (FirstWords, WordHoarder, Centurion, LongWord, MonsterWord, Dedicated, NoMistakes, StreakMaster, QuMaster, VocabularyBuilder, HighRoller), already-unlocked guard, LoadState restore
 - **HighScoreService tests** (6 tests): Qualifying/non-qualifying score recording, empty leaderboard edge case, longest word extraction, completion percentage persistence, repository delegation
 - **StatisticsService tests** (9 tests): Empty/populated repository reads, counter accumulation (rounds, score, words), conditional updates (highest score, longest word, best completion), play time tracking
 - **WordListLoader tests** (10 tests): Stream loading with 3+ char filter, non-alphabetic filtering, whitespace trimming, empty line skipping, empty stream, null/empty path validation, case preservation
@@ -174,7 +194,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - Full project structure with 4 source projects and 4 test projects
   - MVVM architecture with dependency injection
   - UI/UX specification: color palette, typography, component design, all 8 view layouts
-  - 20 achievements defined with unlock conditions
+  - 26 achievements defined with unlock conditions
   - Sound effects plan (13 SFX + ambient music loop) with generation approach
   - Asset generation strategy (word list, font, icon, audio — all automated)
   - Quality gates: TreatWarningsAsErrors, StyleCop, Roslyn analyzers, SonarAnalyzer

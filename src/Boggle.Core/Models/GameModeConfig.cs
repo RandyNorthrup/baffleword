@@ -1,5 +1,5 @@
-// <copyright file="GameModeConfig.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+﻿// <copyright file="GameModeConfig.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Models;
@@ -10,7 +10,7 @@ namespace Boggle.Core.Models;
 public sealed class GameModeConfig
 {
     /// <summary>
-    /// Gets the standard configuration for standard Boggle (4×4).
+    /// Gets the standard configuration for standard Boggle (4x4).
     /// </summary>
     public static GameModeConfig Standard { get; } = new()
     {
@@ -22,7 +22,7 @@ public sealed class GameModeConfig
     };
 
     /// <summary>
-    /// Gets the standard configuration for Big Boggle (5×5).
+    /// Gets the standard configuration for Big Boggle (5x5).
     /// </summary>
     public static GameModeConfig BigBoggle { get; } = new()
     {
@@ -34,7 +34,7 @@ public sealed class GameModeConfig
     };
 
     /// <summary>
-    /// Gets the standard configuration for Super Big Boggle (6×6).
+    /// Gets the standard configuration for Super Big Boggle (6x6).
     /// </summary>
     public static GameModeConfig SuperBigBoggle { get; } = new()
     {
@@ -82,7 +82,7 @@ public sealed class GameModeConfig
             GameMode.Standard => Standard,
             GameMode.BigBoggle => BigBoggle,
             GameMode.SuperBigBoggle => SuperBigBoggle,
-            _ => Standard,
+            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unknown game mode."),
         };
     }
 }

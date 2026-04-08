@@ -1,5 +1,5 @@
-// <copyright file="BoardCell.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="BoardCell.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Models;
@@ -23,13 +23,13 @@ public sealed class BoardCell
         ArgumentOutOfRangeException.ThrowIfNegative(column);
 
         IsBlocked = isBlocked;
-        Letter = isBlocked ? DiceSet.BlockedFace : letter.ToUpperInvariant();
+        Letter = isBlocked ? string.Empty : letter.ToUpperInvariant();
         Row = row;
         Column = column;
     }
 
     /// <summary>
-    /// Gets the letter displayed on this cell (e.g., "A", "QU", "TH", "■").
+    /// Gets the letter displayed on this cell (e.g., "A", "QU", "TH").
     /// </summary>
     public string Letter { get; }
 
@@ -52,11 +52,6 @@ public sealed class BoardCell
     /// Gets a value indicating whether this cell contains a two-letter digraph (e.g., "QU", "TH", "IN").
     /// </summary>
     public bool IsDigraph => !IsBlocked && Letter.Length > 1;
-
-    /// <summary>
-    /// Gets a value indicating whether this cell contains the "Qu" digraph.
-    /// </summary>
-    public bool IsQu => string.Equals(Letter, "QU", StringComparison.Ordinal);
 
     /// <summary>
     /// Determines whether this cell is adjacent to another cell (including diagonals).

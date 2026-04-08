@@ -1,5 +1,5 @@
-// <copyright file="BoardSolverTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+﻿// <copyright file="BoardSolverTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Tests.Services;
@@ -105,8 +105,8 @@ public sealed class BoardSolverTests
     [Fact]
     public void Solve_SkipsBlockedCells()
     {
-        // Board: A B / ■ D — blocked cell at (1,0)
-        // ABD is a valid 3-letter path: (0,0)→(0,1)→(1,1)
+        // Board: A B / [blocked] D -- blocked cell at (1,0)
+        // ABD is a valid 3-letter path: (0,0)->(0,1)->(1,1)
         // But paths through the blocked cell should not work
         var trie = new TrieDictionaryProvider();
         trie.LoadWords(["abd"]);

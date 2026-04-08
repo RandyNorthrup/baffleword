@@ -1,5 +1,5 @@
-// <copyright file="GameViewModelTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="GameViewModelTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.App.Tests.ViewModels;
@@ -11,6 +11,7 @@ using Boggle.Core.Models;
 using Boggle.Core.Repositories;
 using Boggle.Core.Services;
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
@@ -42,20 +43,14 @@ public sealed class GameViewModelTests : IDisposable
             _highScoreService.Object,
             _statisticsService.Object,
             _audioManager.Object,
-            _settingsRepository.Object);
+            _settingsRepository.Object,
+            NullLogger<GameViewModel>.Instance);
     }
 
     [Fact]
     public void Constructor_StartsRound()
     {
         _gameEngine.Verify(g => g.StartRound(TimeSpan.FromMinutes(3), 3, It.IsAny<GameMode>()), Times.Once);
-    }
-
-    [Fact]
-    public void Constructor_InitializesBoardLetters()
-    {
-        _sut.BoardLetters.Should().HaveCount(4);
-        _sut.BoardLetters[0].Should().HaveCount(4);
     }
 
     [Fact]
@@ -91,58 +86,10 @@ public sealed class GameViewModelTests : IDisposable
             _highScoreService.Object,
             _statisticsService.Object,
             audioManager.Object,
-            settingsRepo.Object);
+            settingsRepo.Object,
+            NullLogger<GameViewModel>.Instance);
 
         settingsRepo.Verify(s => s.GetAsync("GameMode"), Times.Once);
-    }
-
-    [Fact]
-    public void SubmitWord_UpdatesFoundWords()
-    {
-        _gameEngine.Setup(g => g.SubmitWord("TEST"))
-            .Returns(new WordResult("TEST", WordStatus.Valid, 1));
-
-        _sut.CurrentWord = "TEST";
-        _sut.SubmitWordCommand.Execute(null);
-
-        _sut.FoundWords.Should().ContainSingle();
-        _sut.FoundWords[0].Word.Should().Be("TEST");
-    }
-
-    [Fact]
-    public void SubmitWord_ClearsCurrentWord()
-    {
-        _gameEngine.Setup(g => g.SubmitWord("TEST"))
-            .Returns(new WordResult("TEST", WordStatus.Valid, 1));
-
-        _sut.CurrentWord = "TEST";
-        _sut.SubmitWordCommand.Execute(null);
-
-        _sut.CurrentWord.Should().BeEmpty();
-    }
-
-    [Fact]
-    public void SubmitWord_ValidWord_SetsFeedback()
-    {
-        _gameEngine.Setup(g => g.SubmitWord("TEST"))
-            .Returns(new WordResult("TEST", WordStatus.Valid, 3));
-
-        _sut.CurrentWord = "TEST";
-        _sut.SubmitWordCommand.Execute(null);
-
-        _sut.LastSubmissionFeedback.Should().Contain("+3");
-    }
-
-    [Fact]
-    public void SubmitWord_NotInDict_SetsFeedback()
-    {
-        _gameEngine.Setup(g => g.SubmitWord("XYZ"))
-            .Returns(new WordResult("XYZ", WordStatus.NotInDictionary, 0));
-
-        _sut.CurrentWord = "XYZ";
-        _sut.SubmitWordCommand.Execute(null);
-
-        _sut.LastSubmissionFeedback.Should().Be("Not a word!");
     }
 
     [Fact]

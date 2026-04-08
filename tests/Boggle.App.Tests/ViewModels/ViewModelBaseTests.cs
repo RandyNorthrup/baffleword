@@ -1,5 +1,5 @@
-// <copyright file="ViewModelBaseTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="ViewModelBaseTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.App.Tests.ViewModels;

@@ -1,5 +1,5 @@
-// <copyright file="BoardCellTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="BoardCellTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Tests.Models;
@@ -49,22 +49,6 @@ public sealed class BoardCellTests
         act.Should().Throw<ArgumentException>();
     }
 
-    [Fact]
-    public void IsQu_ReturnsTrueForQuCell()
-    {
-        var cell = new BoardCell("QU", 0, 0);
-
-        cell.IsQu.Should().BeTrue();
-    }
-
-    [Fact]
-    public void IsQu_ReturnsFalseForNormalCell()
-    {
-        var cell = new BoardCell("Q", 0, 0);
-
-        cell.IsQu.Should().BeFalse();
-    }
-
     [Theory]
     [InlineData(0, 0, 0, 1, true)] // horizontal neighbor
     [InlineData(0, 0, 1, 0, true)] // vertical neighbor
@@ -99,11 +83,11 @@ public sealed class BoardCellTests
     }
 
     [Fact]
-    public void Constructor_WithBlocked_SetsLetterToBlockedFace()
+    public void Constructor_WithBlocked_SetsLetterToEmpty()
     {
-        var cell = new BoardCell("X", 0, 0, isBlocked: true);
+        var cell = new BoardCell("A", 0, 0, isBlocked: true);
 
-        cell.Letter.Should().Be(DiceSet.BlockedFace);
+        cell.Letter.Should().BeEmpty();
     }
 
     [Fact]

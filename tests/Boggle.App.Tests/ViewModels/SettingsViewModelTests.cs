@@ -1,5 +1,5 @@
-// <copyright file="SettingsViewModelTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="SettingsViewModelTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.App.Tests.ViewModels;
@@ -9,6 +9,7 @@ using Boggle.App.ViewModels;
 using Boggle.Audio;
 using Boggle.Core.Repositories;
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
@@ -30,21 +31,21 @@ public sealed class SettingsViewModelTests
     [Fact]
     public void Constructor_ThrowsOnNullSettingsRepository()
     {
-        var act = () => new SettingsViewModel(null!, _navigation.Object, _audioManager.Object);
+        var act = () => new SettingsViewModel(null!, _navigation.Object, _audioManager.Object, NullLogger<SettingsViewModel>.Instance);
         act.Should().Throw<ArgumentNullException>().WithParameterName("settingsRepository");
     }
 
     [Fact]
     public void Constructor_ThrowsOnNullNavigation()
     {
-        var act = () => new SettingsViewModel(_settingsRepo.Object, null!, _audioManager.Object);
+        var act = () => new SettingsViewModel(_settingsRepo.Object, null!, _audioManager.Object, NullLogger<SettingsViewModel>.Instance);
         act.Should().Throw<ArgumentNullException>().WithParameterName("navigation");
     }
 
     [Fact]
     public void Constructor_ThrowsOnNullAudioManager()
     {
-        var act = () => new SettingsViewModel(_settingsRepo.Object, _navigation.Object, null!);
+        var act = () => new SettingsViewModel(_settingsRepo.Object, _navigation.Object, null!, NullLogger<SettingsViewModel>.Instance);
         act.Should().Throw<ArgumentNullException>().WithParameterName("audioManager");
     }
 
@@ -244,5 +245,5 @@ public sealed class SettingsViewModelTests
     }
 
     private SettingsViewModel CreateSut() =>
-        new(_settingsRepo.Object, _navigation.Object, _audioManager.Object);
+        new(_settingsRepo.Object, _navigation.Object, _audioManager.Object, NullLogger<SettingsViewModel>.Instance);
 }

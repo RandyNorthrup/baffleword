@@ -1,5 +1,5 @@
-// <copyright file="AchievementServiceTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="AchievementServiceTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Tests.Services;
@@ -15,7 +15,7 @@ public sealed class AchievementServiceTests
     private readonly AchievementService _sut = new(NullLogger<AchievementService>.Instance);
 
     [Fact]
-    public void GetAllAchievements_Returns20Definitions()
+    public void GetAllAchievements_Returns26Definitions()
     {
         IReadOnlyList<Achievement> achievements = _sut.GetAllAchievements();
 
@@ -173,10 +173,10 @@ public sealed class AchievementServiceTests
     }
 
     [Fact]
-    public void CheckAchievements_500UniqueWords_UnlocksVocabularyBuilder()
+    public void CheckAchievements_500Words_UnlocksVocabularyBuilder()
     {
         GameRound round = CreateRoundWithWords("CAT");
-        GameStatistics stats = new() { TotalRoundsPlayed = 50, UniqueWordsFound = 500 };
+        GameStatistics stats = new() { TotalRoundsPlayed = 50, TotalWordsFound = 500 };
 
         IReadOnlyList<Achievement> unlocked = _sut.CheckAchievements(round, stats);
 

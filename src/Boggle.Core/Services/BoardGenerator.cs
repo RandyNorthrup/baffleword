@@ -1,5 +1,5 @@
-// <copyright file="BoardGenerator.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+﻿// <copyright file="BoardGenerator.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Services;
@@ -60,11 +60,11 @@ public sealed class BoardGenerator : IBoardGenerator
             int row = i / gridSize;
             int col = i % gridSize;
             string face = dice[i].Roll(_random);
-            bool isBlocked = string.Equals(face, DiceSet.BlockedFace, StringComparison.Ordinal);
+            bool isBlocked = face.Length == 0;
             cells[row][col] = new BoardCell(face, row, col, isBlocked);
         }
 
-        _logger.LogDebug("Board generated successfully ({GridSize}×{GridSize2})", gridSize, gridSize);
+        _logger.LogDebug("Board generated successfully ({GridSize}x{GridSize2})", gridSize, gridSize);
         return new GameBoard(cells);
     }
 

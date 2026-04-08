@@ -1,5 +1,5 @@
-// <copyright file="RoundResultsViewModel.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="RoundResultsViewModel.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.App.ViewModels;
@@ -91,11 +91,6 @@ public sealed class RoundResultsViewModel : ViewModelBase
     public ObservableCollection<string> MissedWords { get; }
 
     /// <summary>
-    /// Gets the achievements unlocked this round.
-    /// </summary>
-    public ObservableCollection<Achievement> UnlockedAchievements { get; } = [];
-
-    /// <summary>
     /// Gets the command to start a new round.
     /// </summary>
     public ICommand NewRoundCommand { get; }
@@ -109,8 +104,7 @@ public sealed class RoundResultsViewModel : ViewModelBase
     /// Loads the round results into the view model.
     /// </summary>
     /// <param name="round">The completed game round.</param>
-    /// <param name="unlockedAchievements">Achievements unlocked this round.</param>
-    public void LoadResults(GameRound round, IReadOnlyList<Achievement>? unlockedAchievements = null)
+    public void LoadResults(GameRound round)
     {
         ArgumentNullException.ThrowIfNull(round);
 
@@ -137,15 +131,6 @@ public sealed class RoundResultsViewModel : ViewModelBase
             foreach (string word in round.AllPossibleWords.Where(w => !foundWordSet.Contains(w)))
             {
                 MissedWords.Add(word);
-            }
-        }
-
-        UnlockedAchievements.Clear();
-        if (unlockedAchievements != null)
-        {
-            foreach (Achievement a in unlockedAchievements)
-            {
-                UnlockedAchievements.Add(a);
             }
         }
     }

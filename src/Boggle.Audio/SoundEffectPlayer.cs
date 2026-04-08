@@ -1,11 +1,12 @@
-// <copyright file="SoundEffectPlayer.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="SoundEffectPlayer.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Audio;
 
 using Microsoft.Extensions.Logging;
 using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 
 /// <summary>
 /// Plays fire-and-forget sound effects using NAudio.
@@ -62,7 +63,7 @@ public sealed class SoundEffectPlayer : ISoundEffectPlayer
     }
 
     /// <inheritdoc/>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Objects are disposed in PlaybackStopped event handler.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Objects are disposed in PlaybackStopped event handler or in the finally block on failure.")]
     public void Play(SoundEffect effect)
     {
         if (_disposed || IsMuted)
@@ -76,32 +77,28 @@ public sealed class SoundEffectPlayer : ISoundEffectPlayer
             return;
         }
 
+        MemoryStream? memoryStream = null;
+        WaveFileReader? waveReader = null;
+        WaveOutEvent? waveOut = null;
+        bool playbackStarted = false;
+
         try
         {
-            MemoryStream memoryStream = new(buffer);
-            WaveFileReader waveReader = new(memoryStream);
-            WaveOutEvent waveOut = new() { Volume = Volume };
+            memoryStream = new MemoryStream(buffer);
+            waveReader = new WaveFileReader(memoryStream);
+            VolumeSampleProvider volumeProvider = new(waveReader.ToSampleProvider()) { Volume = Volume };
+            waveOut = new WaveOutEvent();
+            waveOut.Init(volumeProvider);
 
-            try
-            {
-                waveOut.Init(waveReader);
-
-                waveOut.PlaybackStopped += (_, _) =>
-                {
-                    waveOut.Dispose();
-                    waveReader.Dispose();
-                    memoryStream.Dispose();
-                };
-
-                waveOut.Play();
-            }
-            catch
+            waveOut.PlaybackStopped += (_, _) =>
             {
                 waveOut.Dispose();
                 waveReader.Dispose();
                 memoryStream.Dispose();
-                throw;
-            }
+            };
+
+            waveOut.Play();
+            playbackStarted = true;
         }
         catch (InvalidOperationException ex)
         {
@@ -110,6 +107,15 @@ public sealed class SoundEffectPlayer : ISoundEffectPlayer
         catch (IOException ex)
         {
             _logger.LogError(ex, "Failed to read sound data for effect: {Effect}", effect);
+        }
+        finally
+        {
+            if (!playbackStarted)
+            {
+                waveOut?.Dispose();
+                waveReader?.Dispose();
+                memoryStream?.Dispose();
+            }
         }
     }
 
@@ -137,10 +143,8 @@ public sealed class SoundEffectPlayer : ISoundEffectPlayer
             SoundEffect.AchievementUnlock => "achievement_unlock.wav",
             SoundEffect.ButtonHover => "button_hover.wav",
             SoundEffect.ButtonClick => "button_click.wav",
-            SoundEffect.HighScore => "high_score.wav",
             SoundEffect.Pause => "pause.wav",
             SoundEffect.Resume => "resume.wav",
-            SoundEffect.TileShuffle => "tile_shuffle.wav",
             _ => throw new ArgumentOutOfRangeException(nameof(effect), effect, "Unknown sound effect"),
         };
     }

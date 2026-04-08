@@ -1,10 +1,14 @@
 <Project>
   <PropertyGroup>
-    <VersionPrefix>1.5.1</VersionPrefix>
+    <VersionPrefix>1.5.5</VersionPrefix>
     <TargetFramework>net9.0-windows</TargetFramework>
     <LangVersion>13</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Authors>Randy Northrup</Authors>
+    <Company>Randy Northrup</Company>
+    <Copyright>Copyright (c) 2025 Randy Northrup</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningLevel>9999</WarningLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>

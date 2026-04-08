@@ -1,5 +1,5 @@
-// <copyright file="WordResult.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="WordResult.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Models;
@@ -20,6 +20,7 @@ public sealed class WordResult
         Word = word;
         Status = status;
         Points = points;
+        SubmittedAt = DateTime.UtcNow;
     }
 
     /// <summary>
@@ -36,6 +37,11 @@ public sealed class WordResult
     /// Gets the points awarded for this word.
     /// </summary>
     public int Points { get; }
+
+    /// <summary>
+    /// Gets the UTC time when this word was submitted.
+    /// </summary>
+    public DateTime SubmittedAt { get; }
 
     /// <summary>
     /// Gets the length of the submitted word.

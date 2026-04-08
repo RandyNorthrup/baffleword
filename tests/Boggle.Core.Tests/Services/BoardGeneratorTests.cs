@@ -1,5 +1,5 @@
-// <copyright file="BoardGeneratorTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="BoardGeneratorTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Tests.Services;
@@ -125,13 +125,20 @@ public sealed class BoardGeneratorTests
     }
 
     [Fact]
-    public void Generate_SuperBigBoggle_AllCellsHaveLetters()
+    public void Generate_SuperBigBoggle_AllCellsHaveLettersOrAreBlocked()
     {
         GameBoard board = _sut.Generate(GameMode.SuperBigBoggle);
 
         foreach (BoardCell cell in board.AllCells)
         {
-            cell.Letter.Should().NotBeNullOrEmpty();
+            if (cell.IsBlocked)
+            {
+                cell.Letter.Should().BeEmpty();
+            }
+            else
+            {
+                cell.Letter.Should().NotBeNullOrEmpty();
+            }
         }
     }
 

@@ -1,5 +1,5 @@
-// <copyright file="WordListLoader.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="WordListLoader.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Dictionary;
@@ -46,19 +46,5 @@ public sealed class WordListLoader
 
         _logger.LogInformation("Loaded {Count} words from word list", words.Count);
         return words;
-    }
-
-    /// <summary>
-    /// Loads words from a file path (one word per line).
-    /// </summary>
-    /// <param name="filePath">The path to the word list file.</param>
-    /// <returns>An enumerable of words.</returns>
-    public IEnumerable<string> LoadFromFile(string filePath)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
-
-        _logger.LogDebug("Loading word list from file: {FilePath}", filePath);
-        using FileStream stream = File.OpenRead(filePath);
-        return LoadFromStream(stream);
     }
 }

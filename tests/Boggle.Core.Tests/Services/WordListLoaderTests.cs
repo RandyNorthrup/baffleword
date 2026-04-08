@@ -1,5 +1,5 @@
-// <copyright file="WordListLoaderTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="WordListLoaderTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Tests.Services;
@@ -70,30 +70,6 @@ public sealed class WordListLoaderTests
         Action act = () => _sut.LoadFromStream(null!);
 
         act.Should().Throw<ArgumentNullException>();
-    }
-
-    [Fact]
-    public void LoadFromFile_WithNullPath_ThrowsArgumentException()
-    {
-        Action act = () => _sut.LoadFromFile(null!);
-
-        act.Should().Throw<ArgumentException>();
-    }
-
-    [Fact]
-    public void LoadFromFile_WithEmptyPath_ThrowsArgumentException()
-    {
-        Action act = () => _sut.LoadFromFile("   ");
-
-        act.Should().Throw<ArgumentException>();
-    }
-
-    [Fact]
-    public void LoadFromFile_WithNonExistentFile_ThrowsFileNotFoundException()
-    {
-        Action act = () => _sut.LoadFromFile("nonexistent_file_12345.txt");
-
-        act.Should().Throw<FileNotFoundException>();
     }
 
     [Fact]

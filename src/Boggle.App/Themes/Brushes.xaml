@@ -5,7 +5,6 @@
     <SolidColorBrush x:Key="PrimaryBlueBrush" Color="{StaticResource PrimaryBlueColor}" />
     <SolidColorBrush x:Key="LightBlueBrush" Color="{StaticResource LightBlueColor}" />
     <SolidColorBrush x:Key="PaleBlueBrush" Color="{StaticResource PaleBlueColor}" />
-    <SolidColorBrush x:Key="NearWhiteBrush" Color="{StaticResource NearWhiteColor}" />
     <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource WhiteColor}" />
     <SolidColorBrush x:Key="Gray100Brush" Color="{StaticResource Gray100Color}" />
     <SolidColorBrush x:Key="Gray300Brush" Color="{StaticResource Gray300Color}" />
@@ -15,7 +14,6 @@
     <SolidColorBrush x:Key="SuccessGreenBrush" Color="{StaticResource SuccessGreenColor}" />
     <SolidColorBrush x:Key="ErrorRedBrush" Color="{StaticResource ErrorRedColor}" />
     <SolidColorBrush x:Key="LightRedBrush" Color="{StaticResource LightRedColor}" />
-    <SolidColorBrush x:Key="WarningAmberBrush" Color="{StaticResource WarningAmberColor}" />
     <SolidColorBrush x:Key="GoldBrush" Color="{StaticResource GoldColor}" />
 
     <!-- Gradient Brushes -->
@@ -27,11 +25,6 @@
     <LinearGradientBrush x:Key="PageBackgroundGradient" StartPoint="0,0" EndPoint="0,1">
         <GradientStop Color="{StaticResource PaleBlueColor}" Offset="0" />
         <GradientStop Color="{StaticResource NearWhiteColor}" Offset="1" />
-    </LinearGradientBrush>
-
-    <LinearGradientBrush x:Key="CardBackgroundGradient" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="{StaticResource WhiteColor}" Offset="0" />
-        <GradientStop Color="{StaticResource Gray100Color}" Offset="1" />
     </LinearGradientBrush>
 
 </ResourceDictionary>

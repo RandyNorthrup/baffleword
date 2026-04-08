@@ -71,11 +71,11 @@ dotnet run --project src/Boggle.App
 dotnet test
 ```
 
-324 tests across 4 test projects:
-- **Boggle.Core.Tests** (207) — Game engine, board generation, scoring, dictionary, achievements, statistics
-- **Boggle.App.Tests** (92) — ViewModels, navigation, converters, commands
-- **Boggle.Data.Tests** (20) — SQLite repositories, settings persistence
-- **Boggle.Audio.Tests** (5) — Audio manager interface tests
+310 tests across 4 test projects:
+- **Boggle.Core.Tests** — Game engine, board generation, scoring, dictionary, achievements, statistics
+- **Boggle.App.Tests** — ViewModels, navigation, converters, commands
+- **Boggle.Data.Tests** — SQLite repositories, settings persistence
+- **Boggle.Audio.Tests** — Audio manager interface tests
 
 ## Project Structure
 

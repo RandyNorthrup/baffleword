@@ -1,5 +1,5 @@
-// <copyright file="GameModeConfigTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="GameModeConfigTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Tests.Models;
@@ -115,10 +115,10 @@ public sealed class GameModeConfigTests
     }
 
     [Fact]
-    public void ForMode_InvalidMode_FallsBackToStandard()
+    public void ForMode_InvalidMode_ThrowsArgumentOutOfRangeException()
     {
-        GameModeConfig config = GameModeConfig.ForMode((GameMode)99);
+        Action act = () => GameModeConfig.ForMode((GameMode)99);
 
-        config.Should().BeSameAs(GameModeConfig.Standard);
+        act.Should().Throw<ArgumentOutOfRangeException>().WithParameterName("mode");
     }
 }

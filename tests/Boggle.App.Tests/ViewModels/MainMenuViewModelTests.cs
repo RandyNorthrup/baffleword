@@ -1,5 +1,5 @@
-// <copyright file="MainMenuViewModelTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="MainMenuViewModelTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.App.Tests.ViewModels;
@@ -8,6 +8,7 @@ using Boggle.App.Navigation;
 using Boggle.App.ViewModels;
 using Boggle.Core.Repositories;
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
@@ -20,7 +21,7 @@ public sealed class MainMenuViewModelTests
     public MainMenuViewModelTests()
     {
         _settingsRepo.Setup(r => r.SetAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
-        _sut = new MainMenuViewModel(_navigation.Object, _settingsRepo.Object);
+        _sut = new MainMenuViewModel(_navigation.Object, _settingsRepo.Object, NullLogger<MainMenuViewModel>.Instance);
     }
 
     [Fact]
@@ -97,7 +98,7 @@ public sealed class MainMenuViewModelTests
     [Fact]
     public void Constructor_WithNullNavigation_ThrowsArgumentNullException()
     {
-        Action act = () => new MainMenuViewModel(null!, _settingsRepo.Object);
+        Action act = () => new MainMenuViewModel(null!, _settingsRepo.Object, NullLogger<MainMenuViewModel>.Instance);
 
         act.Should().Throw<ArgumentNullException>();
     }
@@ -105,7 +106,7 @@ public sealed class MainMenuViewModelTests
     [Fact]
     public void Constructor_WithNullSettingsRepository_ThrowsArgumentNullException()
     {
-        Action act = () => new MainMenuViewModel(_navigation.Object, null!);
+        Action act = () => new MainMenuViewModel(_navigation.Object, null!, NullLogger<MainMenuViewModel>.Instance);
 
         act.Should().Throw<ArgumentNullException>();
     }

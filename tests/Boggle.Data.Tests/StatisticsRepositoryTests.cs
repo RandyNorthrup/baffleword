@@ -1,5 +1,5 @@
-// <copyright file="StatisticsRepositoryTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="StatisticsRepositoryTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Data.Tests;
@@ -27,7 +27,7 @@ public sealed class StatisticsRepositoryTests : IDisposable
         _keepAlive.Open();
         _db = new BoggleDatabase(connectionString, NullLogger<BoggleDatabase>.Instance);
         _db.InitializeAsync().GetAwaiter().GetResult();
-        _sut = new StatisticsRepository(_db, NullLogger<StatisticsRepository>.Instance);
+        _sut = new StatisticsRepository(_db);
     }
 
     public void Dispose()
@@ -61,16 +61,5 @@ public sealed class StatisticsRepositoryTests : IDisposable
 
         string? value = await _sut.GetAsync("total_games");
         value.Should().Be("20");
-    }
-
-    [Fact]
-    public async Task ClearAllAsync_RemovesAllStatistics()
-    {
-        await _sut.SetAsync("games", "10");
-
-        await _sut.ClearAllAsync();
-
-        string? value = await _sut.GetAsync("games");
-        value.Should().BeNull();
     }
 }

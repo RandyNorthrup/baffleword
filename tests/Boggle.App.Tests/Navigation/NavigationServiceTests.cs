@@ -1,5 +1,5 @@
-// <copyright file="NavigationServiceTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="NavigationServiceTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.App.Tests.Navigation;
@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
-public sealed class NavigationServiceTests
+public sealed class NavigationServiceTests : IDisposable
 {
     private readonly ServiceProvider _serviceProvider;
     private readonly NavigationService _sut;
@@ -119,6 +119,12 @@ public sealed class NavigationServiceTests
         bool result = _sut.GoBack();
 
         result.Should().BeFalse();
+    }
+
+    public void Dispose()
+    {
+        _sut.Dispose();
+        _serviceProvider.Dispose();
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Instantiated by DI container")]

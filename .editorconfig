@@ -191,8 +191,11 @@ dotnet_naming_style.camel_case.capitalization = camel_case
 
 #### StyleCop Suppressions ####
 
-# File header rules (not needed for personal project)
+# SA1636: File header copyright text must match (suppressed; IDE0073 handles header validation)
 dotnet_diagnostic.SA1636.severity = none
+
+# File header template for new files (IDE0073)
+file_header_template = Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 
 # Async methods end with Async
 dotnet_naming_rule.async_methods_should_end_with_async.severity = suggestion

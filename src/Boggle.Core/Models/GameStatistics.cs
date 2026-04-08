@@ -1,5 +1,5 @@
-// <copyright file="GameStatistics.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="GameStatistics.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Core.Models;
@@ -28,11 +28,6 @@ public sealed class GameStatistics
     /// Gets or sets the total number of valid words found.
     /// </summary>
     public int TotalWordsFound { get; set; }
-
-    /// <summary>
-    /// Gets or sets the count of unique words found across all rounds.
-    /// </summary>
-    public int UniqueWordsFound { get; set; }
 
     /// <summary>
     /// Gets or sets the longest word ever found.

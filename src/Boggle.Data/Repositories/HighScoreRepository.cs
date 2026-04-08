@@ -1,5 +1,5 @@
-// <copyright file="HighScoreRepository.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="HighScoreRepository.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Data.Repositories;
@@ -52,6 +52,25 @@ public sealed class HighScoreRepository : IHighScoreRepository
         command.Parameters.AddWithValue("@AchievedAt", entry.AchievedAt.ToString("O", CultureInfo.InvariantCulture));
 
         await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+
+        // Prune entries beyond the top 50 per game mode to prevent unbounded growth
+        using SqliteCommand pruneCommand = connection.CreateCommand();
+        pruneCommand.CommandText = """
+            DELETE FROM HighScores
+            WHERE GameMode = @GameMode AND Id NOT IN (
+                SELECT Id FROM HighScores
+                WHERE GameMode = @GameMode
+                ORDER BY Score DESC
+                LIMIT 50
+            )
+            """;
+        pruneCommand.Parameters.AddWithValue("@GameMode", entry.GameMode.ToString());
+        int pruned = await pruneCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+        if (pruned > 0)
+        {
+            _logger.LogDebug("Pruned {Count} excess high score entries for {Mode}", pruned, entry.GameMode);
+        }
+
         _logger.LogDebug("High score {Score} recorded", entry.Score);
     }
 
@@ -91,7 +110,11 @@ public sealed class HighScoreRepository : IHighScoreRepository
 
         using SqliteCommand command = connection.CreateCommand();
         command.CommandText = """
-            SELECT MIN(Score) FROM (
+            SELECT CASE
+                WHEN COUNT(*) < @TopN THEN 0
+                ELSE COALESCE(MIN(Score), 0)
+            END
+            FROM (
                 SELECT Score FROM HighScores
                 WHERE GameMode = @GameMode
                 ORDER BY Score DESC
@@ -104,19 +127,6 @@ public sealed class HighScoreRepository : IHighScoreRepository
 
         object? result = await command.ExecuteScalarAsync().ConfigureAwait(false);
         return result is long score ? (int)score : 0;
-    }
-
-    /// <inheritdoc/>
-    public async Task ClearAllAsync()
-    {
-        using SqliteConnection connection = _database.CreateConnection();
-        await connection.OpenAsync().ConfigureAwait(false);
-
-        using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = "DELETE FROM HighScores";
-        await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-
-        _logger.LogInformation("All high scores cleared");
     }
 
     private static HighScoreEntry ReadHighScoreEntry(SqliteDataReader reader)

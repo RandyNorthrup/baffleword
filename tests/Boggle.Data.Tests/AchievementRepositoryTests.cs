@@ -1,5 +1,5 @@
-// <copyright file="AchievementRepositoryTests.cs" company="Boggle">
-// Copyright (c) Boggle. All rights reserved.
+// <copyright file="AchievementRepositoryTests.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
 // </copyright>
 
 namespace Boggle.Data.Tests;
@@ -28,7 +28,7 @@ public sealed class AchievementRepositoryTests : IDisposable
         _keepAlive.Open();
         _db = new BoggleDatabase(connectionString, NullLogger<BoggleDatabase>.Instance);
         _db.InitializeAsync().GetAwaiter().GetResult();
-        _sut = new AchievementRepository(_db, NullLogger<AchievementRepository>.Instance);
+        _sut = new AchievementRepository(_db);
     }
 
     public void Dispose()
@@ -70,18 +70,6 @@ public sealed class AchievementRepositoryTests : IDisposable
         IReadOnlyList<Achievement> achievements = await _sut.GetAllAsync();
         achievements.Should().ContainSingle();
         achievements[0].IsUnlocked.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task ClearAllAsync_RemovesAllAchievements()
-    {
-        await _sut.SaveAsync(CreateAchievement(1, "A1", true));
-        await _sut.SaveAsync(CreateAchievement(2, "A2", false));
-
-        await _sut.ClearAllAsync();
-
-        IReadOnlyList<Achievement> achievements = await _sut.GetAllAsync();
-        achievements.Should().BeEmpty();
     }
 
     private static Achievement CreateAchievement(int id, string name, bool unlocked) => new()
