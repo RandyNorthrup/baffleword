@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.5.6] — 2026-04-08
+
+### Fixed
+- **Board interaction after round ends**: Disabled drag selection on the board after the timer expires, preventing a crash ("No active round to submit words to") when dragging during the post-round transition
+
+### Changed
+- **Toast notifications survive view transitions**: Moved achievement toast system from GameView to MainWindow via a new `IToastService` singleton, so toasts are no longer cut short or lost when navigating between screens
+- **Deduplicated `FindVisualChildren<T>`**: Extracted the duplicated visual tree helper from MainWindow.xaml.cs and GameView.xaml.cs into a shared `VisualTreeExtensions` extension method
+- **Version**: Bumped to 1.5.6
+
+### Added
+- **`IToastService` / `ToastService`**: App-wide toast notification service in `Boggle.App.Services`
+- **`VisualTreeExtensions`**: Shared extension method in `Boggle.App.Extensions` for WPF visual tree traversal
+
+---
+
 ## [1.5.5] — 2026-04-08
 
 ### Fixed

@@ -59,7 +59,7 @@
 
         <!-- Version -->
         <StackPanel Grid.Row="4" HorizontalAlignment="Center" Margin="0,0,0,16">
-            <TextBlock Text="v1.5.1"
+            <TextBlock Text="v1.5.6"
                        Style="{StaticResource CaptionStyle}"
                        HorizontalAlignment="Center" />
             <TextBlock Text="Randy Northrup"

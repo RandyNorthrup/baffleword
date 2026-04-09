@@ -205,6 +205,9 @@ public partial class App : Application
         // Navigation
         services.AddSingleton<Navigation.INavigationService, Navigation.NavigationService>();
 
+        // Toast notifications
+        services.AddSingleton<Services.IToastService, Services.ToastService>();
+
         // Main Window
         services.AddSingleton<MainWindow>();
 

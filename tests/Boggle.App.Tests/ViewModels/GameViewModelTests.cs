@@ -5,6 +5,7 @@
 namespace Boggle.App.Tests.ViewModels;
 
 using Boggle.App.Navigation;
+using Boggle.App.Services;
 using Boggle.App.ViewModels;
 using Boggle.Audio;
 using Boggle.Core.Models;
@@ -25,6 +26,7 @@ public sealed class GameViewModelTests : IDisposable
     private readonly Mock<IStatisticsService> _statisticsService = new();
     private readonly Mock<IAudioManager> _audioManager = new();
     private readonly Mock<ISettingsRepository> _settingsRepository = new();
+    private readonly Mock<IToastService> _toastService = new();
     private readonly GameViewModel _sut;
 
     public GameViewModelTests()
@@ -44,6 +46,7 @@ public sealed class GameViewModelTests : IDisposable
             _statisticsService.Object,
             _audioManager.Object,
             _settingsRepository.Object,
+            _toastService.Object,
             NullLogger<GameViewModel>.Instance);
     }
 
@@ -87,6 +90,7 @@ public sealed class GameViewModelTests : IDisposable
             _statisticsService.Object,
             audioManager.Object,
             settingsRepo.Object,
+            new Mock<IToastService>().Object,
             NullLogger<GameViewModel>.Instance);
 
         settingsRepo.Verify(s => s.GetAsync("GameMode"), Times.Once);

@@ -10,6 +10,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Boggle.App.Navigation;
+using Boggle.App.Services;
 using Boggle.Audio;
 using Boggle.Core.Models;
 using Boggle.Core.Repositories;
@@ -29,6 +30,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
     private readonly IStatisticsService _statisticsService;
     private readonly IAudioManager _audioManager;
     private readonly ISettingsRepository _settingsRepository;
+    private readonly IToastService _toastService;
     private readonly ILogger<GameViewModel> _logger;
     private readonly DispatcherTimer _timer;
     private readonly List<TileViewModel> _selectedPath = [];
@@ -61,6 +63,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
     /// <param name="statisticsService">The statistics service.</param>
     /// <param name="audioManager">The audio manager.</param>
     /// <param name="settingsRepository">The settings repository.</param>
+    /// <param name="toastService">The toast notification service.</param>
     /// <param name="logger">The logger instance.</param>
     public GameViewModel(
         IGameEngine gameEngine,
@@ -71,6 +74,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
         IStatisticsService statisticsService,
         IAudioManager audioManager,
         ISettingsRepository settingsRepository,
+        IToastService toastService,
         ILogger<GameViewModel> logger)
     {
         _gameEngine = gameEngine ?? throw new ArgumentNullException(nameof(gameEngine));
@@ -81,6 +85,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
         _statisticsService = statisticsService ?? throw new ArgumentNullException(nameof(statisticsService));
         _audioManager = audioManager ?? throw new ArgumentNullException(nameof(audioManager));
         _settingsRepository = settingsRepository ?? throw new ArgumentNullException(nameof(settingsRepository));
+        _toastService = toastService ?? throw new ArgumentNullException(nameof(toastService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         PauseCommand = new RelayCommand(OnPause, () => !IsPaused);
@@ -96,7 +101,6 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
         GroupedFoundWords.GroupDescriptions.Add(new PropertyGroupDescription(nameof(WordResult.WordLength)));
         GroupedFoundWords.SortDescriptions.Add(new SortDescription(nameof(WordResult.WordLength), ListSortDirection.Descending));
         GroupedFoundWords.SortDescriptions.Add(new SortDescription(nameof(WordResult.Word), ListSortDirection.Ascending));
-        AchievementToasts = [];
         _ = InitializeAsync();
     }
 
@@ -280,17 +284,12 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
     public ICommand SettingsCommand { get; }
 
     /// <summary>
-    /// Gets the collection of achievement toast notifications.
-    /// </summary>
-    public ObservableCollection<Achievement> AchievementToasts { get; }
-
-    /// <summary>
     /// Begins a drag selection starting from the given tile.
     /// </summary>
     /// <param name="tile">The tile where the drag started.</param>
     public void BeginDragSelection(TileViewModel tile)
     {
-        if (IsPaused || tile is null || tile.IsBlocked)
+        if (_currentRound == null || IsPaused || tile is null || tile.IsBlocked)
         {
             return;
         }
@@ -306,7 +305,7 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
     /// <param name="tile">The tile being dragged over.</param>
     public void ExtendDragSelection(TileViewModel tile)
     {
-        if (!IsDragging || tile is null || IsPaused || tile.IsBlocked)
+        if (!IsDragging || tile is null || _currentRound == null || IsPaused || tile.IsBlocked)
         {
             return;
         }
@@ -574,12 +573,8 @@ public sealed class GameViewModel : ViewModelBase, IDisposable
                 _audioManager.SoundEffects.Play(SoundEffect.AchievementUnlock);
                 foreach (Achievement achievement in unlocked)
                 {
-                    AchievementToasts.Add(achievement);
+                    _toastService.Show(achievement);
                 }
-
-                // Wait for all toasts to display (5s) and fade out (400ms), staggered 300ms apart
-                int staggerMs = (unlocked.Count - 1) * 300;
-                await Task.Delay(staggerMs + 5000 + 500).ConfigureAwait(true);
             }
 
             _navigation.NavigateTo<RoundResultsViewModel>();

@@ -4,7 +4,6 @@
 
 namespace Boggle.App.Views;
 
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,9 +12,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
-using System.Windows.Threading;
+using Boggle.App.Extensions;
 using Boggle.App.ViewModels;
-using Boggle.Core.Models;
 
 /// <summary>
 /// Game view with board, timer, drag-to-select, and pause overlay.
@@ -32,25 +30,6 @@ public partial class GameView : UserControl
         InitializeComponent();
         Loaded += OnLoaded;
         DataContextChanged += OnDataContextChanged;
-    }
-
-    private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent)
-        where T : DependencyObject
-    {
-        int count = VisualTreeHelper.GetChildrenCount(parent);
-        for (int i = 0; i < count; i++)
-        {
-            DependencyObject child = VisualTreeHelper.GetChild(parent, i);
-            if (child is T match)
-            {
-                yield return match;
-            }
-
-            foreach (T grandchild in FindVisualChildren<T>(child))
-            {
-                yield return grandchild;
-            }
-        }
     }
 
     private static TileViewModel? GetTileFromElement(DependencyObject? element)
@@ -109,19 +88,9 @@ public partial class GameView : UserControl
             oldVm.PropertyChanged -= OnViewModelPropertyChanged;
         }
 
-        if (e.OldValue is GameViewModel oldGameVm)
-        {
-            oldGameVm.AchievementToasts.CollectionChanged -= OnToastsChanged;
-        }
-
         if (e.NewValue is INotifyPropertyChanged newVm)
         {
             newVm.PropertyChanged += OnViewModelPropertyChanged;
-        }
-
-        if (e.NewValue is GameViewModel newGameVm)
-        {
-            newGameVm.AchievementToasts.CollectionChanged += OnToastsChanged;
         }
     }
 
@@ -206,7 +175,7 @@ public partial class GameView : UserControl
         }
 
         // Find the UniformGrid inside the ItemsControl
-        UniformGrid? grid = FindVisualChildren<UniformGrid>(BoardGrid).FirstOrDefault();
+        UniformGrid? grid = BoardGrid.FindVisualChildren<UniformGrid>().FirstOrDefault();
         if (grid == null)
         {
             return;
@@ -251,7 +220,7 @@ public partial class GameView : UserControl
     private void AnimateBoardEntrance()
     {
         int delay = 0;
-        foreach (Border tile in FindVisualChildren<Border>(BoardGrid).Where(t => t.DataContext is TileViewModel))
+        foreach (Border tile in BoardGrid.FindVisualChildren<Border>().Where(t => t.DataContext is TileViewModel))
         {
             tile.RenderTransformOrigin = new Point(0.5, 0.5);
             tile.RenderTransform = new ScaleTransform(0, 0);
@@ -291,100 +260,5 @@ public partial class GameView : UserControl
 
         FeedbackText.RenderTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleUp);
         FeedbackText.RenderTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleUp.Clone());
-    }
-
-    private void OnToastsChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        if (e.Action != NotifyCollectionChangedAction.Add)
-        {
-            return;
-        }
-
-        // Wait for the ItemsControl to render the new items, then animate them
-        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, AnimateToasts);
-    }
-
-    private void AnimateToasts()
-    {
-        int delay = 0;
-        foreach (Border toast in FindVisualChildren<Border>(ToastContainer).Where(b => b.RenderTransform is TranslateTransform))
-        {
-            if (toast.Opacity > 0)
-            {
-                continue;
-            }
-
-            if (toast.RenderTransform.IsFrozen)
-            {
-                toast.RenderTransform = new TranslateTransform(300, 0);
-            }
-
-            int capturedDelay = delay;
-
-            var slideIn = new DoubleAnimation(300, 0, TimeSpan.FromMilliseconds(400))
-            {
-                BeginTime = TimeSpan.FromMilliseconds(delay),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut },
-            };
-
-            var fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(300))
-            {
-                BeginTime = TimeSpan.FromMilliseconds(delay),
-            };
-
-            toast.BeginAnimation(OpacityProperty, fadeIn);
-            toast.RenderTransform.BeginAnimation(TranslateTransform.XProperty, slideIn);
-
-            ScheduleToastDismissal(toast, capturedDelay);
-
-            delay += 300;
-        }
-    }
-
-    private void ScheduleToastDismissal(Border toast, int entranceDelayMs)
-    {
-        var timer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromMilliseconds(entranceDelayMs + 5000),
-        };
-
-        timer.Tick += (_, _) =>
-        {
-            timer.Stop();
-            FadeOutAndRemoveToast(toast);
-        };
-
-        timer.Start();
-    }
-
-    private void FadeOutAndRemoveToast(Border toast)
-    {
-        if (toast.RenderTransform.IsFrozen)
-        {
-            toast.RenderTransform = new TranslateTransform(0, 0);
-        }
-
-        var slideOut = new DoubleAnimation(0, 300, TimeSpan.FromMilliseconds(400))
-        {
-            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn },
-        };
-
-        var fadeOut = new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(400));
-
-        fadeOut.Completed += (_, _) =>
-        {
-            if (DataContext is GameViewModel vm)
-            {
-                // Find the Achievement bound to this toast and remove it
-                object? item = toast.DataContext;
-                if (item is Achievement achievement)
-                {
-                    vm.AchievementToasts.Remove(achievement);
-                }
-            }
-        };
-
-        toast.BeginAnimation(OpacityProperty, fadeOut);
-        toast.RenderTransform.BeginAnimation(TranslateTransform.XProperty, slideOut);
     }
 }
