@@ -37,22 +37,25 @@ jobs:
         run: dotnet tool install --global vpk --version 0.0.1298
 
       - name: Decode Windows signing certificate
+        id: signing
         shell: pwsh
         env:
           WINDOWS_SIGNING_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_BASE64 }}
           WINDOWS_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_PASSWORD }}
         run: |
-          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_SIGNING_CERTIFICATE_BASE64)) {
-            throw "Missing WINDOWS_SIGNING_CERTIFICATE_BASE64 repository secret."
-          }
-
-          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_SIGNING_CERTIFICATE_PASSWORD)) {
-            throw "Missing WINDOWS_SIGNING_CERTIFICATE_PASSWORD repository secret."
+          # Signing is optional: if either secret is absent, build an unsigned
+          # installer rather than failing the release.
+          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_SIGNING_CERTIFICATE_BASE64) -or
+              [string]::IsNullOrWhiteSpace($env:WINDOWS_SIGNING_CERTIFICATE_PASSWORD)) {
+            Write-Host "::notice::No Windows signing secrets configured; building an unsigned installer."
+            "enabled=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+            return
           }
 
           $certificatePath = Join-Path $env:RUNNER_TEMP "baffleword-signing.pfx"
           [IO.File]::WriteAllBytes($certificatePath, [Convert]::FromBase64String($env:WINDOWS_SIGNING_CERTIFICATE_BASE64))
           "BAFFLEWORD_SIGNING_CERTIFICATE=$certificatePath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "enabled=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
       - name: Publish Windows x64
         shell: pwsh
@@ -66,22 +69,41 @@ jobs:
           WINDOWS_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_PASSWORD }}
         run: |
           $version = "${{ github.ref_name }}".TrimStart("v")
-          $signtoolCommand = Get-Command signtool.exe -ErrorAction SilentlyContinue
-          $signtool = $signtoolCommand.Source
+          $packArgs = @(
+            "pack",
+            "--packId", "Baffleword",
+            "--packVersion", $version,
+            "--packDir", "./publish/win-x64",
+            "--mainExe", "Baffleword.exe",
+            "--packTitle", "Baffleword",
+            "--packAuthors", "Randy Northrup",
+            "--runtime", "win-x64",
+            "--outputDir", "./installer",
+            "--icon", "src/Baffleword.App/Assets/Icons/app_icon.ico",
+            "--noPortable"
+          )
 
-          if ([string]::IsNullOrWhiteSpace($signtool)) {
-            $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Recurse -Filter signtool.exe |
-              Where-Object { $_.FullName -match "\\x64\\signtool.exe$" } |
-              Sort-Object FullName -Descending |
-              Select-Object -First 1 -ExpandProperty FullName
+          if ("${{ steps.signing.outputs.enabled }}" -eq "true") {
+            $signtoolCommand = Get-Command signtool.exe -ErrorAction SilentlyContinue
+            $signtool = $signtoolCommand.Source
+
+            if ([string]::IsNullOrWhiteSpace($signtool)) {
+              $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Recurse -Filter signtool.exe |
+                Where-Object { $_.FullName -match "\\x64\\signtool.exe$" } |
+                Sort-Object FullName -Descending |
+                Select-Object -First 1 -ExpandProperty FullName
+            }
+
+            if ([string]::IsNullOrWhiteSpace($signtool)) {
+              throw "Signing is enabled but signtool.exe was not found on the runner."
+            }
+
+            $signTemplate = '"' + $signtool + '" sign /fd SHA256 /td SHA256 /tr http://timestamp.digicert.com /f "' + $env:BAFFLEWORD_SIGNING_CERTIFICATE + '" /p "' + $env:WINDOWS_SIGNING_CERTIFICATE_PASSWORD + '" "{{file}}"'
+            vpk @packArgs --signTemplate $signTemplate
+          } else {
+            Write-Host "Building unsigned Windows installer."
+            vpk @packArgs
           }
-
-          if ([string]::IsNullOrWhiteSpace($signtool)) {
-            throw "Could not find signtool.exe on runner."
-          }
-
-          $signTemplate = '"' + $signtool + '" sign /fd SHA256 /td SHA256 /tr http://timestamp.digicert.com /f "' + $env:BAFFLEWORD_SIGNING_CERTIFICATE + '" /p "' + $env:WINDOWS_SIGNING_CERTIFICATE_PASSWORD + '" "{{file}}"'
-          vpk pack --packId Baffleword --packVersion $version --packDir ./publish/win-x64 --mainExe Baffleword.exe --packTitle "Baffleword" --packAuthors "Randy Northrup" --runtime win-x64 --outputDir ./installer --icon src/Baffleword.App/Assets/Icons/app_icon.ico --noPortable --signTemplate $signTemplate
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
