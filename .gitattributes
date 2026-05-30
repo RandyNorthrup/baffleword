@@ -1,0 +1,12 @@
+# Normalize line endings: check out text files as LF on every platform so the
+# LF-only formatting rules (.editorconfig / dotnet format) pass on Windows too.
+* text=auto eol=lf
+
+# Binary assets — never normalize or convert line endings.
+*.ico binary
+*.png binary
+*.wav binary
+*.mp3 binary
+*.ttf binary
+*.otf binary
+*.pfx binary
