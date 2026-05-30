@@ -1,0 +1,116 @@
+// <copyright file="NavigationService.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
+// </copyright>
+
+namespace Baffleword.App.Navigation;
+
+using Baffleword.App.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
+/// <summary>
+/// DI-backed navigation service that resolves ViewModels from the service provider.
+/// </summary>
+public sealed class NavigationService : INavigationService
+{
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<NavigationService> _logger;
+    private ViewModelBase? _previousViewModel;
+    private bool _disposed;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NavigationService"/> class.
+    /// </summary>
+    /// <param name="serviceProvider">The service provider for ViewModel resolution.</param>
+    /// <param name="logger">The logger instance.</param>
+    public NavigationService(IServiceProvider serviceProvider, ILogger<NavigationService> logger)
+    {
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
+    /// <inheritdoc/>
+    public event EventHandler? NavigationChanged;
+
+    /// <inheritdoc/>
+    public ViewModelBase? CurrentViewModel { get; private set; }
+
+    /// <inheritdoc/>
+    public void NavigateTo<TViewModel>()
+        where TViewModel : ViewModelBase
+    {
+        if (_logger.IsEnabled(LogLevel.Debug))
+        {
+            _logger.LogDebug("Navigating to {ViewModelType}", typeof(TViewModel).Name);
+        }
+
+        if (CurrentViewModel is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+
+        _previousViewModel = null;
+        CurrentViewModel = _serviceProvider.GetRequiredService<TViewModel>();
+        NavigationChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <inheritdoc/>
+    public void NavigateToPreservingCurrent<TViewModel>()
+        where TViewModel : ViewModelBase
+    {
+        if (_logger.IsEnabled(LogLevel.Debug))
+        {
+            _logger.LogDebug("Navigating to {ViewModelType} (preserving current)", typeof(TViewModel).Name);
+        }
+
+        _previousViewModel = CurrentViewModel;
+        CurrentViewModel = _serviceProvider.GetRequiredService<TViewModel>();
+        NavigationChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <inheritdoc/>
+    public bool GoBack()
+    {
+        if (_previousViewModel == null)
+        {
+            return false;
+        }
+
+        if (_logger.IsEnabled(LogLevel.Debug))
+        {
+            _logger.LogDebug("Navigating back to {ViewModelType}", _previousViewModel.GetType().Name);
+        }
+
+        if (CurrentViewModel is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+
+        CurrentViewModel = _previousViewModel;
+        _previousViewModel = null;
+        NavigationChanged?.Invoke(this, EventArgs.Empty);
+        return true;
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            if (_previousViewModel is IDisposable previousDisposable)
+            {
+                previousDisposable.Dispose();
+            }
+
+            if (CurrentViewModel is IDisposable currentDisposable)
+            {
+                currentDisposable.Dispose();
+            }
+
+            _previousViewModel = null;
+            CurrentViewModel = null;
+            _disposed = true;
+            _logger.LogDebug("NavigationService disposed");
+        }
+    }
+}

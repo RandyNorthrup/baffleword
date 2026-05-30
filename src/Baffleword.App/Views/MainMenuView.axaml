@@ -1,0 +1,81 @@
+<UserControl x:Class="Baffleword.App.Views.MainMenuView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Baffleword.App.ViewModels"
+             x:DataType="vm:MainMenuViewModel">
+  <Grid Background="{StaticResource PageBackgroundGradient}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="1"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,40">
+      <TextBlock Text="BAFFLEWORD"
+                 FontSize="56"
+                 FontWeight="Bold"
+                 Foreground="{StaticResource PrimaryBlueBrush}"
+                 HorizontalAlignment="Center"
+                 Margin="0,0,0,8" />
+      <TextBlock Text="Single Player Word Game"
+                 Classes="body"
+                 HorizontalAlignment="Center"
+                 Foreground="{StaticResource Gray500Brush}" />
+    </StackPanel>
+
+    <StackPanel Grid.Row="2"
+                HorizontalAlignment="Center"
+                Width="280">
+      <Button Content="Standard"
+              Command="{Binding PlayStandardCommand}"
+              Classes="secondary"
+              HorizontalAlignment="Stretch"
+              Margin="0,0,0,8" />
+      <Button Content="Big Board"
+              Command="{Binding PlayBigBoardCommand}"
+              Classes="secondary"
+              HorizontalAlignment="Stretch"
+              Margin="0,0,0,8" />
+      <Button Content="Super Board"
+              Command="{Binding PlaySuperBoardCommand}"
+              Classes="secondary"
+              HorizontalAlignment="Stretch"
+              Margin="0,0,0,8" />
+      <Button Content="High Scores"
+              Command="{Binding HighScoresCommand}"
+              Classes="secondary"
+              HorizontalAlignment="Stretch"
+              Margin="0,0,0,8" />
+      <Button Content="Achievements"
+              Command="{Binding AchievementsCommand}"
+              Classes="secondary"
+              HorizontalAlignment="Stretch"
+              Margin="0,0,0,8" />
+      <Button Content="How to Play"
+              Command="{Binding HowToPlayCommand}"
+              Classes="secondary"
+              HorizontalAlignment="Stretch"
+              Margin="0,0,0,8" />
+      <Button Content="Settings"
+              Command="{Binding SettingsCommand}"
+              Classes="secondary"
+              HorizontalAlignment="Stretch" />
+    </StackPanel>
+
+    <StackPanel Grid.Row="4"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,16">
+      <TextBlock Text="v1.5.7"
+                 Classes="caption"
+                 HorizontalAlignment="Center" />
+      <TextBlock Text="Randy Northrup"
+                 Classes="caption"
+                 HorizontalAlignment="Center"
+                 Margin="0,2,0,0" />
+    </StackPanel>
+  </Grid>
+</UserControl>

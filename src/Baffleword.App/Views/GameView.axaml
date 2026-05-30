@@ -1,0 +1,207 @@
+<UserControl x:Class="Baffleword.App.Views.GameView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Baffleword.App.ViewModels"
+             xmlns:models="using:Baffleword.Core.Models"
+             x:DataType="vm:GameViewModel"
+             PointerReleased="OnPointerReleased">
+  <Grid Background="{StaticResource PageBackgroundGradient}">
+    <Grid RowDefinitions="Auto,Auto,*"
+          x:Name="GameContent"
+          Classes="game-content"
+          Classes.paused="{Binding IsPaused}">
+      <Border Grid.Row="0"
+              Classes="card"
+              Margin="16,16,16,0"
+              Padding="16,12">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+
+          <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock Text="Score: " Classes="body" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding Score}" Classes="score" />
+          </StackPanel>
+
+          <TextBlock Grid.Column="1"
+                     Text="{Binding TimeRemainingText}"
+                     Classes="timer"
+                     Classes.warning="{Binding IsTimerWarning}"
+                     FontSize="36"
+                     VerticalAlignment="Center" />
+
+          <Button Grid.Column="2"
+                  Command="{Binding PauseCommand}"
+                  Classes="secondary"
+                  HorizontalAlignment="Right"
+                  Padding="16,8">
+            <StackPanel Orientation="Horizontal">
+              <Viewbox Width="16" Height="16" Margin="0,0,6,0">
+                <Canvas Width="48" Height="48">
+                  <Path Fill="{StaticResource PrimaryBlueBrush}" Data="M20,24H10V8c0-1.1,0.9-2,2-2h6c1.1,0,2,0.9,2,2V24z" />
+                  <Path Fill="#3A85C2" Data="M18,42h-6c-1.1,0-2-0.9-2-2V24h10v16C20,41.1,19.1,42,18,42z" />
+                  <Path Fill="{StaticResource PrimaryBlueBrush}" Data="M38,24H28V8c0-1.1,0.9-2,2-2h6c1.1,0,2,0.9,2,2V24z" />
+                  <Path Fill="#3A85C2" Data="M36,42h-6c-1.1,0-2-0.9-2-2V24h10v16C38,41.1,37.1,42,36,42z" />
+                </Canvas>
+              </Viewbox>
+              <TextBlock Text="Pause" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+        </Grid>
+      </Border>
+
+      <Border Grid.Row="1"
+              Classes="card"
+              Margin="16,8"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Top"
+              Width="{Binding BoardContainerSize}"
+              Height="{Binding BoardContainerSize}"
+              Padding="8">
+        <Grid>
+          <ItemsControl x:Name="BoardGrid"
+                        ItemsSource="{Binding Tiles}"
+                        Background="Transparent"
+                        PointerPressed="OnBoardPointerPressed"
+                        PointerMoved="OnBoardPointerMoved"
+                        PointerReleased="OnBoardPointerReleased">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <UniformGrid Rows="{Binding BoardRows}" Columns="{Binding BoardColumns}" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:TileViewModel">
+                <Border Classes="tile"
+                        Classes.selected="{Binding IsSelected}"
+                        Classes.blocked="{Binding IsBlocked}"
+                        Tag="{Binding}"
+                        Width="{Binding $parent[ItemsControl].DataContext.TileSize}"
+                        Height="{Binding $parent[ItemsControl].DataContext.TileSize}"
+                        Margin="{Binding $parent[ItemsControl].DataContext.TileMarginThickness}">
+                  <Grid>
+                    <TextBlock Text="{Binding Letter}"
+                               Classes="tile-letter"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="{Binding $parent[ItemsControl].DataContext.TileFontSize}"
+                               FontWeight="Bold" />
+                    <Viewbox HorizontalAlignment="Center"
+                             VerticalAlignment="Center"
+                             Width="{Binding $parent[ItemsControl].DataContext.TileFontSize}"
+                             Height="{Binding $parent[ItemsControl].DataContext.TileFontSize}"
+                             IsVisible="{Binding IsBlocked}">
+                      <Canvas Width="48" Height="48">
+                        <Path Fill="{StaticResource ErrorRedBrush}" Data="M24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,12.955,35.045,4,24,4z M24,38c-7.732,0-14-6.268-14-14s6.268-14,14-14s14,6.268,14,14S31.732,38,24,38z" />
+                        <Polygon Fill="{StaticResource ErrorRedBrush}" Points="13.371,38.871 9.129,34.629 34.629,9.129 38.871,13.371" />
+                      </Canvas>
+                    </Viewbox>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <Canvas x:Name="DragLineCanvas" IsHitTestVisible="False" />
+        </Grid>
+      </Border>
+
+      <Grid Grid.Row="2" Margin="16,0,16,16">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="{Binding CurrentWord}"
+                   Classes="h2"
+                   Foreground="{StaticResource PrimaryBlueBrush}"
+                   HorizontalAlignment="Center"
+                   MinHeight="28"
+                   Margin="0,0,0,8" />
+
+        <TextBlock Grid.Row="1"
+                   Text="{Binding LastSubmissionFeedback}"
+                   Classes="body"
+                   FontWeight="SemiBold"
+                   Margin="0,4,0,8"
+                   HorizontalAlignment="Center" />
+
+        <Border Grid.Row="2"
+                Classes="card"
+                MaxHeight="150"
+                Padding="8">
+          <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding GroupedFoundWords}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:FoundWordGroup">
+                  <StackPanel>
+                    <Border Classes="group-header">
+                      <TextBlock Foreground="White"
+                                 FontWeight="SemiBold"
+                                 FontSize="13"
+                                 Text="{Binding HeaderText}" />
+                    </Border>
+                    <ItemsControl ItemsSource="{Binding Words}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:WordResult">
+                          <Grid Margin="4,2">
+                            <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="*" />
+                              <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding Word}"
+                                       Classes="body" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Points, StringFormat='+{0}'}"
+                                       Classes="body"
+                                       Foreground="{StaticResource SuccessGreenBrush}" />
+                          </Grid>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </Border>
+      </Grid>
+    </Grid>
+
+    <Grid IsVisible="{Binding IsPaused}"
+          Background="#73000000">
+      <Border Classes="card"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Width="320"
+              Padding="32">
+        <StackPanel HorizontalAlignment="Stretch">
+          <TextBlock Text="Paused"
+                     Classes="h1"
+                     HorizontalAlignment="Center"
+                     Margin="0,0,0,24" />
+          <Button Content="Resume"
+                  Command="{Binding ResumeCommand}"
+                  Classes="primary"
+                  Margin="0,0,0,12"
+                  HorizontalAlignment="Stretch" />
+          <Button Content="Settings"
+                  Command="{Binding SettingsCommand}"
+                  Classes="secondary"
+                  Margin="0,0,0,12"
+                  HorizontalAlignment="Stretch" />
+          <Button Content="Quit to Menu"
+                  Command="{Binding QuitCommand}"
+                  Classes="secondary"
+                  HorizontalAlignment="Stretch" />
+        </StackPanel>
+      </Border>
+    </Grid>
+  </Grid>
+</UserControl>

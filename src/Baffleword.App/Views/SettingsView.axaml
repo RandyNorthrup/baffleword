@@ -1,0 +1,62 @@
+<UserControl x:Class="Baffleword.App.Views.SettingsView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Baffleword.App.ViewModels"
+             x:DataType="vm:SettingsViewModel">
+  <Grid Background="{StaticResource PageBackgroundGradient}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <TextBlock Grid.Row="0"
+               Text="Settings"
+               Classes="h1"
+               HorizontalAlignment="Center"
+               Margin="0,24,0,16" />
+
+    <Border Grid.Row="1"
+            Classes="card"
+            Margin="64,0"
+            VerticalAlignment="Center">
+      <StackPanel>
+        <TextBlock Text="Sound Effects Volume"
+                   Classes="body"
+                   Margin="0,0,0,4" />
+        <Slider Minimum="0"
+                Maximum="1"
+                TickFrequency="0.1"
+                Value="{Binding SfxVolume}"
+                IsEnabled="{Binding CanAdjustSfxVolume}"
+                Classes="themed"
+                Margin="0,0,0,4" />
+        <CheckBox Content="Mute Sound Effects"
+                  IsChecked="{Binding IsSfxMuted}"
+                  Classes="themed"
+                  Margin="0,0,0,20" />
+
+        <TextBlock Text="Music Volume"
+                   Classes="body"
+                   Margin="0,0,0,4" />
+        <Slider Minimum="0"
+                Maximum="1"
+                TickFrequency="0.1"
+                Value="{Binding MusicVolume}"
+                IsEnabled="{Binding CanAdjustMusicVolume}"
+                Classes="themed"
+                Margin="0,0,0,4" />
+        <CheckBox Content="Mute Music"
+                  IsChecked="{Binding IsMusicMuted}"
+                  Classes="themed" />
+      </StackPanel>
+    </Border>
+
+    <Button Grid.Row="2"
+            Content="Back"
+            Command="{Binding BackCommand}"
+            Classes="secondary"
+            HorizontalAlignment="Center"
+            Margin="0,16,0,24" />
+  </Grid>
+</UserControl>

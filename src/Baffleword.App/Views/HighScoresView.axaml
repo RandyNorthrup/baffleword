@@ -1,0 +1,111 @@
+<UserControl x:Class="Baffleword.App.Views.HighScoresView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Baffleword.App.ViewModels"
+             xmlns:models="using:Baffleword.Core.Models"
+             x:DataType="vm:HighScoresViewModel">
+  <Grid Background="{StaticResource PageBackgroundGradient}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="0" Margin="32,24,32,0">
+      <TextBlock Text="High Scores"
+                 Classes="h1"
+                 HorizontalAlignment="Center"
+                 Margin="0,0,0,16" />
+
+      <UniformGrid Rows="1"
+                   HorizontalAlignment="Center"
+                   Width="400"
+                   Margin="0,0,0,8">
+        <Button Content="Standard"
+                Command="{Binding ShowStandardCommand}"
+                Classes="secondary"
+                Classes.mode-selected="{Binding IsStandardSelected}"
+                Margin="0,0,4,0" />
+        <Button Content="Big Board"
+                Command="{Binding ShowBigBoardCommand}"
+                Classes="secondary"
+                Classes.mode-selected="{Binding IsBigBoardSelected}"
+                Margin="4,0,4,0" />
+        <Button Content="Super Big"
+                Command="{Binding ShowSuperBoardCommand}"
+                Classes="secondary"
+                Classes.mode-selected="{Binding IsSuperBoardSelected}"
+                Margin="4,0,0,0" />
+      </UniformGrid>
+    </StackPanel>
+
+    <Border Grid.Row="1"
+            Classes="card"
+            Margin="32,16">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+          <Grid Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="60" />
+              <ColumnDefinition Width="80" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="80" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Score" Classes="caption" FontWeight="Bold" />
+            <TextBlock Grid.Column="1" Text="Words" Classes="caption" FontWeight="Bold" />
+            <TextBlock Grid.Column="2" Text="Longest Word" Classes="caption" FontWeight="Bold" />
+            <TextBlock Grid.Column="3" Text="Complete" Classes="caption" FontWeight="Bold" />
+            <TextBlock Grid.Column="4" Text="Date" Classes="caption" FontWeight="Bold" Margin="0,0,4,0" />
+          </Grid>
+          <Separator Margin="0,0,0,4" />
+
+          <ItemsControl ItemsSource="{Binding Scores}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="models:HighScoreEntry">
+                <Grid Margin="0,4">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="80" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="80" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0"
+                             Text="{Binding Score}"
+                             Classes="score"
+                             FontSize="18" />
+                  <TextBlock Grid.Column="1"
+                             Text="{Binding WordsFound}"
+                             Classes="body"
+                             VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="2"
+                             Text="{Binding LongestWord}"
+                             Classes="body"
+                             VerticalAlignment="Center"
+                             FontWeight="SemiBold"
+                             Foreground="{StaticResource PrimaryBlueBrush}" />
+                  <TextBlock Grid.Column="3"
+                             Text="{Binding CompletionPercentage, StringFormat='{}{0:F1}%'}"
+                             Classes="body"
+                             VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="4"
+                             Text="{Binding AchievedAt, StringFormat='{}{0:MMM dd}'}"
+                             Classes="caption"
+                             VerticalAlignment="Center" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </ScrollViewer>
+    </Border>
+
+    <Button Grid.Row="2"
+            Content="Back to Menu"
+            Command="{Binding BackCommand}"
+            Classes="secondary"
+            HorizontalAlignment="Center"
+            Margin="0,0,0,24" />
+  </Grid>
+</UserControl>

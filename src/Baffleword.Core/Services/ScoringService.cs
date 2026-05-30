@@ -1,0 +1,56 @@
+// <copyright file="ScoringService.cs" company="Randy Northrup">
+// Copyright (c) 2025 Randy Northrup. Licensed under the MIT License.
+// </copyright>
+
+namespace Baffleword.Core.Services;
+
+using Baffleword.Core.Models;
+
+/// <summary>
+/// Calculates Baffleword word scores.
+/// </summary>
+public sealed class ScoringService : IScoringService
+{
+    /// <inheritdoc/>
+    public int CalculateWordScore(string word, GameMode mode = GameMode.Standard)
+    {
+        int length = GetEffectiveLength(word);
+
+        if (mode == GameMode.SuperBoard)
+        {
+            return length switch
+            {
+                < 4 => 0,
+                4 => 1,
+                5 => 2,
+                6 => 3,
+                7 => 5,
+                8 => 11,
+                _ => length * 2,
+            };
+        }
+
+        return length switch
+        {
+            < 3 => 0,
+            3 or 4 => 1,
+            5 => 2,
+            6 => 3,
+            7 => 5,
+            _ => 11,
+        };
+    }
+
+    /// <inheritdoc/>
+    public int GetEffectiveLength(string word)
+    {
+        if (string.IsNullOrEmpty(word))
+        {
+            return 0;
+        }
+
+        // The word itself IS the effective length; "QU" on a die represents
+        // 2 letters but the word spelling already contains both Q and U.
+        return word.Length;
+    }
+}

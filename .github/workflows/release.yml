@@ -9,17 +9,20 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  windows-installer:
+    name: Windows installer
     runs-on: windows-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup .NET 9
-        uses: actions/setup-dotnet@v4
+      - name: Setup .NET SDKs
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: |
+            10.0.x
+            9.0.x
 
       - name: Restore
         run: dotnet restore
@@ -30,14 +33,102 @@ jobs:
       - name: Test
         run: dotnet test --configuration Release --no-build --verbosity normal
 
-      - name: Publish
-        run: dotnet publish src/Boggle.App/Boggle.App.csproj --configuration Release --output ./publish --self-contained false
+      - name: Install Velopack
+        run: dotnet tool install --global vpk --version 0.0.1298
 
-      - name: Package
-        run: Compress-Archive -Path ./publish/* -DestinationPath ./Boggle-${{ github.ref_name }}.zip
+      - name: Decode Windows signing certificate
+        shell: pwsh
+        env:
+          WINDOWS_SIGNING_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_BASE64 }}
+          WINDOWS_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_PASSWORD }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_SIGNING_CERTIFICATE_BASE64)) {
+            throw "Missing WINDOWS_SIGNING_CERTIFICATE_BASE64 repository secret."
+          }
+
+          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_SIGNING_CERTIFICATE_PASSWORD)) {
+            throw "Missing WINDOWS_SIGNING_CERTIFICATE_PASSWORD repository secret."
+          }
+
+          $certificatePath = Join-Path $env:RUNNER_TEMP "baffleword-signing.pfx"
+          [IO.File]::WriteAllBytes($certificatePath, [Convert]::FromBase64String($env:WINDOWS_SIGNING_CERTIFICATE_BASE64))
+          "BAFFLEWORD_SIGNING_CERTIFICATE=$certificatePath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Publish Windows x64
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          dotnet publish src/Baffleword.App/Baffleword.App.csproj --configuration Release --runtime win-x64 --self-contained true --output ./publish/win-x64 /p:Version=$version /p:DebugType=None /p:DebugSymbols=false
+
+      - name: Build installer
+        shell: pwsh
+        env:
+          WINDOWS_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_PASSWORD }}
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          $signtoolCommand = Get-Command signtool.exe -ErrorAction SilentlyContinue
+          $signtool = $signtoolCommand.Source
+
+          if ([string]::IsNullOrWhiteSpace($signtool)) {
+            $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Recurse -Filter signtool.exe |
+              Where-Object { $_.FullName -match "\\x64\\signtool.exe$" } |
+              Sort-Object FullName -Descending |
+              Select-Object -First 1 -ExpandProperty FullName
+          }
+
+          if ([string]::IsNullOrWhiteSpace($signtool)) {
+            throw "Could not find signtool.exe on runner."
+          }
+
+          $signTemplate = '"' + $signtool + '" sign /fd SHA256 /td SHA256 /tr http://timestamp.digicert.com /f "' + $env:BAFFLEWORD_SIGNING_CERTIFICATE + '" /p "' + $env:WINDOWS_SIGNING_CERTIFICATE_PASSWORD + '" "{{file}}"'
+          vpk pack --packId Baffleword --packVersion $version --packDir ./publish/win-x64 --mainExe Baffleword.exe --packTitle "Baffleword" --packAuthors "Randy Northrup" --runtime win-x64 --outputDir ./installer --icon src/Baffleword.App/Assets/Icons/app_icon.ico --noPortable --signTemplate $signTemplate
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: Boggle-${{ github.ref_name }}.zip
+          files: installer/*
+          generate_release_notes: true
+
+  portable-builds:
+    name: ${{ matrix.rid }} build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rid:
+          - linux-x64
+          - osx-x64
+          - osx-arm64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Publish ${{ matrix.rid }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          dotnet publish src/Baffleword.App/Baffleword.App.csproj \
+            --configuration Release \
+            --runtime ${{ matrix.rid }} \
+            --self-contained true \
+            --output ./publish/${{ matrix.rid }} \
+            /p:Version="$version" /p:DebugType=None /p:DebugSymbols=false
+
+      - name: Archive ${{ matrix.rid }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          tar -czf "Baffleword-$version-${{ matrix.rid }}.tar.gz" -C "./publish/${{ matrix.rid }}" .
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Baffleword-*-${{ matrix.rid }}.tar.gz
           generate_release_notes: true

@@ -1,0 +1,35 @@
+<Application x:Class="Baffleword.App.App"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Baffleword.App.ViewModels"
+             xmlns:views="using:Baffleword.App.Views"
+             RequestedThemeVariant="Light">
+  <Application.Styles>
+    <FluentTheme />
+    <StyleInclude Source="avares://Baffleword/Themes/AppStyles.axaml" />
+  </Application.Styles>
+
+  <Application.DataTemplates>
+    <DataTemplate DataType="{x:Type vm:MainMenuViewModel}">
+      <views:MainMenuView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:GameViewModel}">
+      <views:GameView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:RoundResultsViewModel}">
+      <views:RoundResultsView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:HighScoresViewModel}">
+      <views:HighScoresView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:AchievementsViewModel}">
+      <views:AchievementsView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+      <views:SettingsView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:HowToPlayViewModel}">
+      <views:HowToPlayView />
+    </DataTemplate>
+  </Application.DataTemplates>
+</Application>

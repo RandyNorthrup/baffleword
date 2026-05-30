@@ -3,6 +3,9 @@
 [Oo]bj/
 [Dd]ebug/
 [Rr]elease/
+publish/
+installer/
+Releases/
 x64/
 x86/
 
@@ -18,6 +21,11 @@ x86/
 *.user
 *.userosscache
 *.sln.docstates
+
+# Signing certificates
+*.pfx
+*.p12
+*.cer
 
 # VS Code
 .vscode/*

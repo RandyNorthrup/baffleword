@@ -1,0 +1,349 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:b="using:Baffleword.App.Behaviors">
+  <Styles.Resources>
+    <Color x:Key="PrimaryBlueColor">#4A9BD9</Color>
+    <Color x:Key="PrimaryBlueLightColor">#6BB0E5</Color>
+    <Color x:Key="LightBlueColor">#B8D8F0</Color>
+    <Color x:Key="PaleBlueColor">#E8F2FA</Color>
+    <Color x:Key="NearWhiteColor">#F7F9FC</Color>
+    <Color x:Key="WhiteColor">#FFFFFF</Color>
+    <Color x:Key="Gray100Color">#F0F2F5</Color>
+    <Color x:Key="Gray300Color">#C4CAD0</Color>
+    <Color x:Key="Gray500Color">#7A8490</Color>
+    <Color x:Key="Gray700Color">#3D4551</Color>
+    <Color x:Key="Gray900Color">#1A1F26</Color>
+    <Color x:Key="SuccessGreenColor">#4CAF82</Color>
+    <Color x:Key="ErrorRedColor">#E05C5C</Color>
+    <Color x:Key="LightRedColor">#FADADD</Color>
+    <Color x:Key="GoldColor">#F0C040</Color>
+
+    <SolidColorBrush x:Key="PrimaryBlueBrush" Color="{StaticResource PrimaryBlueColor}" />
+    <SolidColorBrush x:Key="LightBlueBrush" Color="{StaticResource LightBlueColor}" />
+    <SolidColorBrush x:Key="PaleBlueBrush" Color="{StaticResource PaleBlueColor}" />
+    <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource WhiteColor}" />
+    <SolidColorBrush x:Key="Gray100Brush" Color="{StaticResource Gray100Color}" />
+    <SolidColorBrush x:Key="Gray300Brush" Color="{StaticResource Gray300Color}" />
+    <SolidColorBrush x:Key="Gray500Brush" Color="{StaticResource Gray500Color}" />
+    <SolidColorBrush x:Key="Gray700Brush" Color="{StaticResource Gray700Color}" />
+    <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900Color}" />
+    <SolidColorBrush x:Key="SuccessGreenBrush" Color="{StaticResource SuccessGreenColor}" />
+    <SolidColorBrush x:Key="ErrorRedBrush" Color="{StaticResource ErrorRedColor}" />
+    <SolidColorBrush x:Key="LightRedBrush" Color="{StaticResource LightRedColor}" />
+    <SolidColorBrush x:Key="GoldBrush" Color="{StaticResource GoldColor}" />
+
+    <LinearGradientBrush x:Key="PrimaryButtonGradient" StartPoint="0%,0%" EndPoint="0%,100%">
+      <GradientStop Color="{StaticResource PrimaryBlueLightColor}" Offset="0" />
+      <GradientStop Color="{StaticResource PrimaryBlueColor}" Offset="1" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="PageBackgroundGradient" StartPoint="0%,0%" EndPoint="0%,100%">
+      <GradientStop Color="{StaticResource PaleBlueColor}" Offset="0" />
+      <GradientStop Color="{StaticResource NearWhiteColor}" Offset="1" />
+    </LinearGradientBrush>
+  </Styles.Resources>
+
+  <Style Selector="TextBlock">
+    <Setter Property="FontFamily" Value="Segoe UI, Inter, Arial" />
+    <Setter Property="Foreground" Value="{StaticResource Gray700Brush}" />
+  </Style>
+
+  <Style Selector="TextBlock.h1">
+    <Setter Property="FontSize" Value="28" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Foreground" Value="{StaticResource Gray900Brush}" />
+  </Style>
+
+  <Style Selector="TextBlock.h2">
+    <Setter Property="FontSize" Value="22" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{StaticResource Gray900Brush}" />
+  </Style>
+
+  <Style Selector="TextBlock.body">
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="Foreground" Value="{StaticResource Gray700Brush}" />
+  </Style>
+
+  <Style Selector="TextBlock.timer">
+    <Setter Property="FontSize" Value="48" />
+    <Setter Property="FontWeight" Value="Light" />
+    <Setter Property="Foreground" Value="{StaticResource PrimaryBlueBrush}" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="TextBlock.timer.warning">
+    <Setter Property="Foreground" Value="{StaticResource ErrorRedBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.score">
+    <Setter Property="FontSize" Value="24" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Foreground" Value="{StaticResource PrimaryBlueBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.caption">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="Foreground" Value="{StaticResource Gray500Brush}" />
+  </Style>
+
+  <Style Selector="Button">
+    <Setter Property="b:ButtonSoundBehavior.EnableSounds" Value="True" />
+    <Setter Property="MinHeight" Value="42" />
+    <Setter Property="Padding" Value="24,12" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="FontFamily" Value="Segoe UI, Inter, Arial" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="ButtonBorder"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                BoxShadow="0 2 8 0 #0F000000">
+          <ContentPresenter Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="Button.primary">
+    <Setter Property="Background" Value="{StaticResource PrimaryButtonGradient}" />
+    <Setter Property="Foreground" Value="White" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+
+  <Style Selector="Button.secondary">
+    <Setter Property="Background" Value="{StaticResource WhiteBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource Gray700Brush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource Gray300Brush}" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+
+  <Style Selector="Button.secondary:pointerover /template/ Border#ButtonBorder">
+    <Setter Property="Background" Value="{StaticResource Gray100Brush}" />
+  </Style>
+
+  <Style Selector="Button.secondary.mode-selected">
+    <Setter Property="Background" Value="{StaticResource PrimaryBlueBrush}" />
+    <Setter Property="Foreground" Value="White" />
+    <Setter Property="BorderBrush" Value="{StaticResource PrimaryBlueBrush}" />
+  </Style>
+
+  <Style Selector="Border.card">
+    <Setter Property="Background" Value="{StaticResource WhiteBrush}" />
+    <Setter Property="CornerRadius" Value="12" />
+    <Setter Property="Padding" Value="20" />
+    <Setter Property="BoxShadow" Value="0 4 16 0 #14000000" />
+  </Style>
+
+  <Style Selector="Border.tile">
+    <Setter Property="Background" Value="{StaticResource WhiteBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource LightBlueBrush}" />
+    <Setter Property="BorderThickness" Value="2" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="BoxShadow" Value="0 2 8 0 #14000000" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+
+  <Style Selector="Border.tile.selected">
+    <Setter Property="Background" Value="{StaticResource PrimaryBlueBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource PrimaryBlueBrush}" />
+  </Style>
+
+  <Style Selector="Border.tile.blocked">
+    <Setter Property="Background" Value="{StaticResource LightRedBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource ErrorRedBrush}" />
+    <Setter Property="Cursor" Value="Arrow" />
+  </Style>
+
+  <Style Selector="Border.tile TextBlock.tile-letter">
+    <Setter Property="Foreground" Value="{StaticResource Gray700Brush}" />
+  </Style>
+
+  <Style Selector="Border.tile.selected TextBlock.tile-letter">
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+
+  <Style Selector="Border.group-header">
+    <Setter Property="Background" Value="{StaticResource PrimaryBlueBrush}" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Padding" Value="8,4" />
+    <Setter Property="Margin" Value="0,4,0,2" />
+  </Style>
+
+  <Style Selector="Border.word-chip">
+    <Setter Property="Background" Value="{StaticResource Gray100Brush}" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Padding" Value="6,2" />
+    <Setter Property="Margin" Value="2" />
+  </Style>
+
+  <Style Selector="Border.achievement-card">
+    <Setter Property="Background" Value="{StaticResource WhiteBrush}" />
+    <Setter Property="CornerRadius" Value="12" />
+    <Setter Property="Padding" Value="16" />
+    <Setter Property="BoxShadow" Value="0 2 8 0 #0F000000" />
+    <Setter Property="Opacity" Value="0.5" />
+  </Style>
+
+  <Style Selector="Border.achievement-card.unlocked">
+    <Setter Property="Opacity" Value="1" />
+  </Style>
+
+  <Style Selector="Border.toast">
+    <Setter Property="Background" Value="{StaticResource GoldBrush}" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="12,8" />
+    <Setter Property="Margin" Value="0,8,0,0" />
+  </Style>
+
+  <Style Selector="Grid.game-content.paused">
+    <Setter Property="Opacity" Value="0.55" />
+    <Setter Property="Effect" Value="blur(20)" />
+  </Style>
+
+  <Style Selector="RepeatButton.slider-track-hit">
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="Transparent" />
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="ProgressBar.slider-track-progress">
+    <Setter Property="Height" Value="6" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid Height="6"
+              ClipToBounds="True">
+          <Border Name="PART_Track"
+                  Background="{StaticResource Gray300Brush}"
+                  CornerRadius="3" />
+          <Border Name="PART_Indicator"
+                  Background="{StaticResource PrimaryBlueBrush}"
+                  CornerRadius="3"
+                  HorizontalAlignment="Left" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="Thumb.slider-thumb">
+    <Setter Property="Width" Value="20" />
+    <Setter Property="Height" Value="20" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Ellipse Name="SliderThumbEllipse"
+                 Fill="{StaticResource WhiteBrush}"
+                 Stroke="{StaticResource PrimaryBlueBrush}"
+                 StrokeThickness="2" />
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="Thumb.slider-thumb:pointerover /template/ Ellipse#SliderThumbEllipse">
+    <Setter Property="Fill" Value="{StaticResource PaleBlueBrush}" />
+  </Style>
+
+  <Style Selector="Thumb.slider-thumb:pressed /template/ Ellipse#SliderThumbEllipse">
+    <Setter Property="Fill" Value="{StaticResource LightBlueBrush}" />
+  </Style>
+
+  <Style Selector="Slider.themed">
+    <Setter Property="Height" Value="28" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid Height="28">
+          <ProgressBar Classes="slider-track-progress"
+                       Minimum="{TemplateBinding Minimum}"
+                       Maximum="{TemplateBinding Maximum}"
+                       Value="{TemplateBinding Value}"
+                       IsHitTestVisible="False" />
+          <Track Name="PART_Track"
+                 Minimum="{TemplateBinding Minimum}"
+                 Maximum="{TemplateBinding Maximum}"
+                 Value="{Binding Value, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                 Orientation="{TemplateBinding Orientation}"
+                 IsDirectionReversed="{TemplateBinding IsDirectionReversed}">
+            <Track.DecreaseButton>
+              <RepeatButton Classes="slider-track-hit" />
+            </Track.DecreaseButton>
+            <Track.Thumb>
+              <Thumb Classes="slider-thumb" />
+            </Track.Thumb>
+            <Track.IncreaseButton>
+              <RepeatButton Classes="slider-track-hit" />
+            </Track.IncreaseButton>
+          </Track>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="CheckBox.themed">
+    <Setter Property="FontFamily" Value="Segoe UI, Inter, Arial" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Foreground" Value="{StaticResource Gray700Brush}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+          <Border Name="CheckBoxBox"
+                  Width="20"
+                  Height="20"
+                  CornerRadius="4"
+                  Background="{StaticResource WhiteBrush}"
+                  BorderBrush="{StaticResource Gray300Brush}"
+                  BorderThickness="1.5"
+                  VerticalAlignment="Center">
+            <Path Name="CheckBoxCheck"
+                  Data="M3,7 L7,11 L13,3"
+                  Stroke="White"
+                  StrokeThickness="2"
+                  Stretch="Uniform"
+                  Margin="3"
+                  IsVisible="False" />
+          </Border>
+          <ContentPresenter Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center" />
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="CheckBox.themed:pointerover:not(:checked) /template/ Border#CheckBoxBox">
+    <Setter Property="Background" Value="{StaticResource PaleBlueBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource LightBlueBrush}" />
+  </Style>
+
+  <Style Selector="CheckBox.themed:checked /template/ Border#CheckBoxBox">
+    <Setter Property="Background" Value="{StaticResource PrimaryBlueBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource PrimaryBlueBrush}" />
+  </Style>
+
+  <Style Selector="CheckBox.themed:checked /template/ Path#CheckBoxCheck">
+    <Setter Property="IsVisible" Value="True" />
+  </Style>
+
+  <Style Selector="CheckBox.themed:checked:pointerover /template/ Border#CheckBoxBox">
+    <Setter Property="Background" Value="{StaticResource LightBlueBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource LightBlueBrush}" />
+  </Style>
+</Styles>

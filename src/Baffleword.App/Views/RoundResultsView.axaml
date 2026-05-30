@@ -1,0 +1,107 @@
+<UserControl x:Class="Baffleword.App.Views.RoundResultsView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Baffleword.App.ViewModels"
+             xmlns:models="using:Baffleword.Core.Models"
+             x:DataType="vm:RoundResultsViewModel">
+  <Grid Background="{StaticResource PageBackgroundGradient}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="32">
+      <StackPanel HorizontalAlignment="Center" MaxWidth="600">
+        <TextBlock Text="Round Complete!"
+                   Classes="h1"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,24" />
+
+        <Border Classes="card" Margin="0,0,0,16">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,16">
+              <TextBlock Text="Score" Classes="caption" HorizontalAlignment="Center" />
+              <TextBlock Text="{Binding Score}" Classes="score" FontSize="36" HorizontalAlignment="Center" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,16">
+              <TextBlock Text="Words Found" Classes="caption" HorizontalAlignment="Center" />
+              <TextBlock Text="{Binding WordsFound}" Classes="score" FontSize="36" HorizontalAlignment="Center" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center">
+              <TextBlock Text="Completion" Classes="caption" HorizontalAlignment="Center" />
+              <TextBlock Text="{Binding CompletionPercentage, StringFormat='{}{0:F1}%'}"
+                         Classes="score"
+                         HorizontalAlignment="Center" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center">
+              <TextBlock Text="Longest Word" Classes="caption" HorizontalAlignment="Center" />
+              <TextBlock Text="{Binding LongestWord}" Classes="score" FontSize="18" HorizontalAlignment="Center" />
+            </StackPanel>
+          </Grid>
+        </Border>
+
+        <Border Classes="card" Margin="0,0,0,16">
+          <StackPanel>
+            <TextBlock Text="Your Words" Classes="h2" Margin="0,0,0,8" />
+            <ItemsControl ItemsSource="{Binding FoundWords}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="models:WordResult">
+                  <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding Word}" Classes="body" />
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding Points, StringFormat='+{0}'}"
+                               Classes="body"
+                               Foreground="{StaticResource SuccessGreenBrush}" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+        <Expander Header="{Binding TotalPossibleWords, StringFormat='Words You Missed ({0} total possible)'}"
+                  Margin="0,0,0,16">
+          <Border Classes="card">
+            <ItemsControl ItemsSource="{Binding MissedWords}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <WrapPanel />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border Classes="word-chip">
+                    <TextBlock Text="{Binding}" Classes="caption" />
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </Border>
+        </Expander>
+
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Margin="0,8,0,0">
+          <Button Content="New Round"
+                  Command="{Binding NewRoundCommand}"
+                  Classes="primary"
+                  Margin="0,0,12,0" />
+          <Button Content="Main Menu"
+                  Command="{Binding MainMenuCommand}"
+                  Classes="secondary" />
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </Grid>
+</UserControl>
