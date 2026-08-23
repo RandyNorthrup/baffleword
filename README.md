@@ -131,3 +131,9 @@ Baffleword is an independent, fan-made parody clone of the dice word game common
 ## License
 
 MIT
+
+## Support this project
+
+If this project saves you time, you can
+[buy me a coffee](https://www.paypal.com/donate/?hosted_button_id=Q9VC7B42R7K82)
+via PayPal. Thank you!
