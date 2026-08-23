@@ -1,8 +1,25 @@
 # Baffleword - A Boggle Word Game Parody
 
+[![CI](https://github.com/RandyNorthrup/baffleword/actions/workflows/ci.yml/badge.svg)](https://github.com/RandyNorthrup/baffleword/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/RandyNorthrup/baffleword?color=ec4899)](https://github.com/RandyNorthrup/baffleword/releases)
+[![MIT License](https://img.shields.io/badge/license-MIT-7c3aed.svg)](LICENSE)
+![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-2563eb.svg)
+![.NET 10](https://img.shields.io/badge/.NET-10-512bd4.svg)
+![Avalonia UI](https://img.shields.io/badge/Avalonia-UI-8b5cf6.svg)
+![Dictionary](https://img.shields.io/badge/NWL2020-191%2C745%20words-0ea5e9.svg)
+
 Baffleword is a single-player, **parody clone of the classic Boggle® dice word game** — an independent, unofficial homage built for fun and learning. You shake up a grid of letter dice and race the clock to trace as many words as you can across adjacent tiles. It's a polished cross-platform desktop game built with .NET 10 and Avalonia, featuring three game modes, MVVM architecture, drag-to-select, achievements, and persistent high scores.
 
 > **Not affiliated with, endorsed by, or sponsored by Hasbro.** Boggle® is a registered trademark of Hasbro, Inc. Baffleword is a fan-made parody and is neither produced nor approved by the trademark owner. See [Disclaimer](#disclaimer).
+
+![Baffleword mid-round on a Standard 4x4 board: live score, countdown timer, letter grid, and the found-word list grouped by word length](docs/assets/game-standard.png)
+
+## See it play
+
+| Trace a word | Finish the round |
+|---|---|
+| ![Dragging across adjacent tiles on a Super Board, with the selection path drawn between highlighted tiles and the word forming below the grid](docs/assets/drag-select.png) | ![Round Complete screen showing score, words found, completion percentage, longest word, the full word list, and achievement notifications sliding in](docs/assets/round-results.png) |
+| Click and drag across adjacent tiles — the path is drawn as you go and the word builds live beneath the board | Every round ends with a full breakdown: score, words found, board completion, longest word, and any achievements you just unlocked |
 
 ## Features
 
@@ -23,6 +40,25 @@ Baffleword is a single-player, **parody clone of the classic Boggle® dice word 
 | Standard | 4x4 | 3 letters | 3 min | Classic letter-grid play |
 | Big Board | 5x5 | 4 letters | 3 min | Larger grid, longer words |
 | Super Board | 6x6 | 4 letters | 4 min | Blocked tiles, digraph dice |
+
+| Big Board (5x5) | Super Board (6x6) |
+|---|---|
+| ![Big Board mode: a 5x5 letter grid with the found-word list showing 7- and 8-letter words](docs/assets/game-big-board.png) | ![Super Board mode: a 6x6 grid including a TH digraph tile, with six 9-letter words found and a score of 108](docs/assets/game-super-board.png) |
+| Twenty-five dice and a four-letter minimum push you toward longer words | Thirty-six dice, digraph tiles like `TH`, and 2-points-per-letter scoring on 9+ letter words |
+
+## Screens
+
+| Main menu | How to play |
+|---|---|
+| ![Baffleword main menu listing Standard, Big Board, Super Board, High Scores, Achievements, How to Play, and Settings](docs/assets/main-menu.png) | ![How to Play screen explaining the rules of tracing words across adjacent tiles](docs/assets/how-to-play.png) |
+
+| Pause | Settings |
+|---|---|
+| ![Pause overlay with Resume, Settings, and Quit to Menu over a blurred board](docs/assets/paused.png) | ![Settings screen with sound effects and music volume controls plus mute toggles](docs/assets/settings.png) |
+
+| High scores | Achievements |
+|---|---|
+| ![High Scores screen with per-mode tabs for Standard, Big Board, and Super Big, listing score, words, longest word, completion, and date](docs/assets/high-scores.png) | ![Achievements screen showing unlock milestones such as First Words, Word Hoarder, Centurion, and Long Word](docs/assets/achievements.png) |
 
 ## Scoring
 
@@ -103,6 +139,8 @@ tests/
   Baffleword.App.Tests/
   Baffleword.Data.Tests/
   Baffleword.Audio.Tests/
+docs/
+  assets/                README screenshots
 ```
 
 ## Architecture
