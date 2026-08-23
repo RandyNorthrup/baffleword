@@ -1,4 +1,4 @@
-# Baffleword - A Boggle-Style Word Game Parody
+# Baffleword - A Boggle Word Game Parody
 
 Baffleword is a single-player, **parody clone of the classic Boggle® dice word game** — an independent, unofficial homage built for fun and learning. You shake up a grid of letter dice and race the clock to trace as many words as you can across adjacent tiles. It's a polished cross-platform desktop game built with .NET 10 and Avalonia, featuring three game modes, MVVM architecture, drag-to-select, achievements, and persistent high scores.
 
